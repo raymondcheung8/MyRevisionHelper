@@ -53,7 +53,6 @@ namespace MyRevisionHelper
         // Method that closes the break form and displays the main menu form to the user
         private void homeIcon_Click(object sender, EventArgs e)
         {
-            this.Owner.Show();
             this.Close();
         }
 

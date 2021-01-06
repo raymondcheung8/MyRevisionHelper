@@ -36,6 +36,7 @@
             this.break_btn = new System.Windows.Forms.Button();
             this.exit_btn = new System.Windows.Forms.Button();
             this.create_btn = new System.Windows.Forms.Button();
+            this.login_btn = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // qna_btn
@@ -118,6 +119,16 @@
             this.create_btn.UseVisualStyleBackColor = true;
             this.create_btn.Click += new System.EventHandler(this.create_btn_Click);
             // 
+            // login_btn
+            // 
+            this.login_btn.Location = new System.Drawing.Point(12, 12);
+            this.login_btn.Name = "login_btn";
+            this.login_btn.Size = new System.Drawing.Size(418, 129);
+            this.login_btn.TabIndex = 8;
+            this.login_btn.Text = "Login";
+            this.login_btn.UseVisualStyleBackColor = true;
+            this.login_btn.Click += new System.EventHandler(this.login_btn_Click);
+            // 
             // MainMenu
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -131,6 +142,7 @@
             this.Controls.Add(this.mathQ_btn);
             this.Controls.Add(this.wordedQ_btn);
             this.Controls.Add(this.qna_btn);
+            this.Controls.Add(this.login_btn);
             this.Name = "MainMenu";
             this.Text = "Main Menu";
             this.Load += new System.EventHandler(this.MainMenu_Load);
@@ -148,6 +160,7 @@
         private System.Windows.Forms.Button break_btn;
         private System.Windows.Forms.Button exit_btn;
         private System.Windows.Forms.Button create_btn;
+        private System.Windows.Forms.Button login_btn;
     }
 }
 

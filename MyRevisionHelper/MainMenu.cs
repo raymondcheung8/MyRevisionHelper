@@ -11,7 +11,7 @@ using System.Windows.Forms;
 namespace MyRevisionHelper
 {
     public partial class MainMenu : Form
-    {
+    {        
         public MainMenu()
         {
             InitializeComponent();
@@ -45,9 +45,55 @@ namespace MyRevisionHelper
             exit_btn.BackColor = Color.LightCoral;
             exit_btn.FlatStyle = FlatStyle.Flat;
             exit_btn.FlatAppearance.BorderColor = Color.Red;
+            login_btn.BackColor = Color.LightSkyBlue;
+            login_btn.FlatStyle = FlatStyle.Flat;
+            login_btn.FlatAppearance.BorderColor = Color.DeepSkyBlue;
 
             // Setting form colour
             this.BackColor = Color.White;
+
+            // Hides all the buttons except the login button and exit button
+            qna_btn.Hide();
+            wordedQ_btn.Hide();
+            mathQ_btn.Hide();
+            timedMC_btn.Hide();
+            create_btn.Hide();
+            notes_btn.Hide();
+            break_btn.Hide();
+        }
+
+        // Method for what happens when login_btn is clicked
+        private void login_btn_Click(object sender, EventArgs e)
+        {
+            // Creates a new login form
+            Login newForm = new Login();
+
+            // Hides the main menu form
+            this.Hide();
+
+            // Displays the new login form
+            if (newForm.ShowDialog() == DialogResult.OK)
+            {
+                // Shows all the regular buttons
+                qna_btn.Show();
+                wordedQ_btn.Show();
+                mathQ_btn.Show();
+                timedMC_btn.Show();
+                notes_btn.Show();
+                break_btn.Show();
+
+                // Hides the login button
+                login_btn.Hide();
+
+                // Shows the create button if the user is an admin
+                if (newForm.admin) create_btn.Show();
+
+                // Releases all resources used by the new form
+                newForm.Dispose();
+            }
+
+            // Makes the main menu form visible again
+            this.Show();
         }
 
         // Method for what happens when qna_btn is clicked
@@ -117,9 +163,9 @@ namespace MyRevisionHelper
         // A procedure that opens a new form when the parameter is an existing form
         private void openNewForm(Form newForm)
         {
-            newForm.Owner = this;
-            newForm.Show();
             this.Hide();
+            newForm.ShowDialog();
+            this.Show();
         }
     }
 }
