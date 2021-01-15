@@ -82,7 +82,7 @@
             // 
             this.confirm_btn.Location = new System.Drawing.Point(76, 79);
             this.confirm_btn.Name = "confirm_btn";
-            this.confirm_btn.Size = new System.Drawing.Size(101, 23);
+            this.confirm_btn.Size = new System.Drawing.Size(100, 23);
             this.confirm_btn.TabIndex = 5;
             this.confirm_btn.Text = "Create new user";
             this.confirm_btn.UseVisualStyleBackColor = true;

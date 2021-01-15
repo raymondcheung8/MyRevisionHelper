@@ -79,8 +79,10 @@ namespace MyRevisionHelper
                 wordedQ_btn.Show();
                 mathQ_btn.Show();
                 timedMC_btn.Show();
-                notes_btn.Show();
                 break_btn.Show();
+
+                // Shows the notes button if the user isn't a guest
+                if (!Program.guest) notes_btn.Show();
 
                 // Hides the login button
                 login_btn.Hide();
@@ -163,9 +165,13 @@ namespace MyRevisionHelper
         // A procedure that opens a new form when the parameter is an existing form
         private void openNewForm(Form newForm)
         {
+            // Redirects the user to the new form and then back to the main menu form when the new form is closed
             this.Hide();
             newForm.ShowDialog();
             this.Show();
+
+            // Releases all resources used by the new form
+            newForm.Dispose();
         }
     }
 }

@@ -44,11 +44,23 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AddNote.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AddNote.Designer.cs">
+      <DependentUpon>AddNote.cs</DependentUpon>
+    </Compile>
     <Compile Include="Break.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Break.Designer.cs">
       <DependentUpon>Break.cs</DependentUpon>
+    </Compile>
+    <Compile Include="CheckNotes.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CheckNotes.Designer.cs">
+      <DependentUpon>CheckNotes.cs</DependentUpon>
     </Compile>
     <Compile Include="Create.cs">
       <SubType>Form</SubType>
@@ -106,8 +118,14 @@
     <Compile Include="WordedQ.Designer.cs">
       <DependentUpon>WordedQ.cs</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="AddNote.resx">
+      <DependentUpon>AddNote.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Break.resx">
       <DependentUpon>Break.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CheckNotes.resx">
+      <DependentUpon>CheckNotes.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Login.resx">
       <DependentUpon>Login.cs</DependentUpon>
@@ -120,6 +138,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="NewUser.resx">
       <DependentUpon>NewUser.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Notes.resx">
+      <DependentUpon>Notes.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

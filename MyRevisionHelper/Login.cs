@@ -77,6 +77,7 @@ namespace MyRevisionHelper
                     // Creates a new object called command that can allow SQL code to be run
                     using (OleDbCommand command = new OleDbCommand())
                     {
+                        // Initialises the connection
                         command.Connection = connection;
 
                         // Calls upon the getTableExists() function and will create a new table called tblUsers if there isn't already an existing one
@@ -234,58 +235,7 @@ FROM tblTest;
         // Function that returns whether a certain table exists
         private bool getTableExists(OleDbConnection connection, string tableName)
         {
-            // Declares a new datatable that will contain all of the tables
-            DataTable tableSchema;
-
-            // Declares a new datatable that will contain the table that is being searched for
-            DataRow[] myTable;
-
-            // Opens a new connection if there isn't already a connection open (this just makes sure an error relating to no connection being open won't occur)
-            if (connection.State != ConnectionState.Open) connection.Open();
-
-            // Copies all the tables on the database to a local datatable
-            tableSchema = connection.GetSchema("TABLES");
-
-            // Copies all the tables that have the same name as the table we are searching for to a datarow array
-            myTable = tableSchema.Select(string.Format("TABLE_NAME='{0}'", tableName));
-
-            // Returns false if the datarow is empty and otherwise returns true
-            if (myTable.Length == 0)
-            {
-                // Test to see if it will show the correct message when table doesn't exist
-                //MessageBox.Show("TABLE DOESN'T EXIST");
-
-                return false;
-            }
-            else
-            {
-                // Test to see if it will show the correct message when table doesn't exist
-                //MessageBox.Show("TABLE EXISTS");
-
-                return true;
-            }
-
-            // THE BELOW CODE DOESN'T WORK AS IT THROWS A PERMISSION ERROR FOR THE TABLE 'MSysObjects'
-            /*
-            // A SQL query that finds if a certain table already exists
-            // Type 1, Type 4, Type 6 in MSysObjects are the user created tables
-            // type 1 = Table - Local Access Tables
-            // type 4 = Table - Linked ODBC Tables
-            // type 6 = Table - Linked Access Tables
-            command.CommandText = string.Format(@"
-SELECT MSysObjects.Name
-FROM MSysObjects
-WHERE
-MSysObjects.type In (1,4,6)
-AND MSysObjects.Name = '{0}'
-", tableName);
-
-            // Runs the SQL code and stores the result in reader
-            OleDbDataReader reader = command.ExecuteReader();
-
-            // Returns the boolean value of whether or not reader has rows
-            return reader.HasRows;
-             */
+            return Program.getTableExists(connection, tableName);
         }
 
         // Method that opens a new form that allows the user to create a new account
