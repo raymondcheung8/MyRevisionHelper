@@ -30,13 +30,13 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Login));
             this.homeIcon = new System.Windows.Forms.PictureBox();
-            this.newLoginLbl = new System.Windows.Forms.Label();
+            this.newLogin_lbl = new System.Windows.Forms.Label();
             this.password_textbox = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
             this.username_textbox = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.login_btn = new System.Windows.Forms.Button();
-            this.guestLbl = new System.Windows.Forms.Label();
+            this.guest_lbl = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.homeIcon)).BeginInit();
             this.SuspendLayout();
             // 
@@ -51,15 +51,15 @@
             this.homeIcon.TabStop = false;
             this.homeIcon.Click += new System.EventHandler(this.homeIcon_Click);
             // 
-            // newLoginLbl
+            // newLogin_lbl
             // 
-            this.newLoginLbl.AutoSize = true;
-            this.newLoginLbl.Location = new System.Drawing.Point(12, 99);
-            this.newLoginLbl.Name = "newLoginLbl";
-            this.newLoginLbl.Size = new System.Drawing.Size(156, 13);
-            this.newLoginLbl.TabIndex = 9;
-            this.newLoginLbl.Text = "Click here to create a new login";
-            this.newLoginLbl.Click += new System.EventHandler(this.newLoginLbl_Click);
+            this.newLogin_lbl.AutoSize = true;
+            this.newLogin_lbl.Location = new System.Drawing.Point(12, 99);
+            this.newLogin_lbl.Name = "newLogin_lbl";
+            this.newLogin_lbl.Size = new System.Drawing.Size(156, 13);
+            this.newLogin_lbl.TabIndex = 9;
+            this.newLogin_lbl.Text = "Click here to create a new login";
+            this.newLogin_lbl.Click += new System.EventHandler(this.newLogin_lbl_Click);
             // 
             // password_textbox
             // 
@@ -103,28 +103,28 @@
             this.login_btn.UseVisualStyleBackColor = true;
             this.login_btn.Click += new System.EventHandler(this.login_btn_Click);
             // 
-            // guestLbl
+            // guest_lbl
             // 
-            this.guestLbl.AutoSize = true;
-            this.guestLbl.Location = new System.Drawing.Point(12, 117);
-            this.guestLbl.Name = "guestLbl";
-            this.guestLbl.Size = new System.Drawing.Size(156, 13);
-            this.guestLbl.TabIndex = 15;
-            this.guestLbl.Text = "Or click here to login as a guest";
-            this.guestLbl.Click += new System.EventHandler(this.guestLbl_Click);
+            this.guest_lbl.AutoSize = true;
+            this.guest_lbl.Location = new System.Drawing.Point(12, 117);
+            this.guest_lbl.Name = "guest_lbl";
+            this.guest_lbl.Size = new System.Drawing.Size(156, 13);
+            this.guest_lbl.TabIndex = 15;
+            this.guest_lbl.Text = "Or click here to login as a guest";
+            this.guest_lbl.Click += new System.EventHandler(this.guest_lbl_Click);
             // 
             // Login
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(184, 136);
-            this.Controls.Add(this.guestLbl);
+            this.Controls.Add(this.guest_lbl);
             this.Controls.Add(this.login_btn);
             this.Controls.Add(this.password_textbox);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.username_textbox);
             this.Controls.Add(this.label1);
-            this.Controls.Add(this.newLoginLbl);
+            this.Controls.Add(this.newLogin_lbl);
             this.Controls.Add(this.homeIcon);
             this.Name = "Login";
             this.Text = "Login";
@@ -138,13 +138,13 @@
         #endregion
 
         private System.Windows.Forms.PictureBox homeIcon;
-        private System.Windows.Forms.Label newLoginLbl;
+        private System.Windows.Forms.Label newLogin_lbl;
         private System.Windows.Forms.TextBox password_textbox;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.TextBox username_textbox;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Button login_btn;
-        private System.Windows.Forms.Label guestLbl;
+        private System.Windows.Forms.Label guest_lbl;
 
     }
 }

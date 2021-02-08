@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Data.OleDb;
+using System.Data.SqlClient;
 
 namespace MyRevisionHelper
 {
@@ -25,10 +25,10 @@ namespace MyRevisionHelper
             try
             {
                 // Declaring the connection
-                using (OleDbConnection connection = new OleDbConnection())
+                using (SqlConnection connection = new SqlConnection())
                 {
 
-                    // This allows us to connect to Access 2007
+                    // This allows us to connect to SQL Server
                     connection.ConnectionString = Program.connectionString;
 
                     // Opens the connection to the database
@@ -37,7 +37,7 @@ namespace MyRevisionHelper
 
 
                     // Creates a new object called command that can allow SQL code to be run
-                    using (OleDbCommand command = new OleDbCommand())
+                    using (SqlCommand command = new SqlCommand())
                     {
                         command.Connection = connection;
 
@@ -50,7 +50,7 @@ CREATE TABLE tblNotes
 (
 noteID          CHAR(36)    NOT NULL    PRIMARY KEY,
 insertDate      DATETIME    NOT NULL,
-noteDescr       MEMO        NOT NULL,
+noteDescr       TEXT        NOT NULL,
 userID          CHAR(36)    NOT NULL    REFERENCES  tblUsers (userID)
 );
 ";
@@ -96,7 +96,7 @@ userID          CHAR(36)    NOT NULL    REFERENCES  tblUsers (userID)
         }
 
         // Function that returns whether a certain table exists
-        private bool getTableExists(OleDbConnection connection, string tableName)
+        private bool getTableExists(SqlConnection connection, string tableName)
         {
             return Program.getTableExists(connection, tableName);
         }

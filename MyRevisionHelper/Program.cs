@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Data.OleDb;
+using System.Data.SqlClient;
 using System.Security.Cryptography;
 using System.Data;
 
@@ -11,12 +11,8 @@ namespace MyRevisionHelper
 {
     static class Program
     {
-        // Creates and sets the values for two new global constant strings that contain the databasePath and databaseName
-        public const string databasePath = @"D:\Pers\WCGS\#U6 Hw\Computer Science\MyRevisionHelper" + "\\";
-        public const string databaseName = "MyRevisionHelper.accdb";
-
-        // Creates and sets the values for a new global constant string that contains the connection string
-        public static string connectionString = string.Format("Provider=Microsoft.ACE.OLEDB.12.0;Data Source={0}{1};Persist Security Info=False;", databasePath, databaseName);
+        // Creates and sets the values for a new global string that contains the connection string
+        public static string connectionString = string.Format(@"Server=DELL4310\SQLEXPRESS;Database=MyRevisionHelper;Trusted_Connection=True;");
 
         // Creates a new global string that contains the userID and initialises this string to ""
         public static string userID = "";
@@ -25,7 +21,7 @@ namespace MyRevisionHelper
         public static bool guest = false;
 
         // Function that returns whether a certain table exists
-        public static bool getTableExists(OleDbConnection connection, string tableName)
+        public static bool getTableExists(SqlConnection connection, string tableName)
         {
             // Declares a new datatable that will contain all of the tables
             DataTable tableSchema;
@@ -74,7 +70,7 @@ AND MSysObjects.Name = '{0}'
 ", tableName);
 
             // Runs the SQL code and stores the result in reader
-            OleDbDataReader reader = command.ExecuteReader();
+            SqlDataReader reader = command.ExecuteReader();
 
             // Returns the boolean value of whether or not reader has rows
             return reader.HasRows;
@@ -102,11 +98,11 @@ AND MSysObjects.Name = '{0}'
         // Function that returns the salted hash
         public static byte[] getSaltedHash(string password, byte[] salt)
         {
-            // Initiates a hash that implements PBKDF2
+            // Creates a hash that implements PBKDF2
             Rfc2898DeriveBytes hash = new Rfc2898DeriveBytes(password, salt, iterations: 10000);
 
-            // Sets the number of characters of the hashed password to 32
-            int numberOfCharacters = 32;
+            // Sets the number of characters of the hashed password
+            int numberOfCharacters = hPasswordLength;
 
             // Returns the salted hash as a string
             return hash.GetBytes(numberOfCharacters);
@@ -115,11 +111,11 @@ AND MSysObjects.Name = '{0}'
         // Function that returns a random byte array (the salt)
         public static byte[] getSalt()
         {
-            // Initiates a new random byte array generator
+            // Creates a new random byte array generator
             RNGCryptoServiceProvider random = new RNGCryptoServiceProvider();
 
-            // Creates an empty salt array of length 32
-            byte[] salt = new byte[32];
+            // Creates an empty salt array
+            byte[] salt = new byte[saltLength];
 
             // Store random bytes in the empty array
             random.GetNonZeroBytes(salt);
@@ -129,7 +125,7 @@ AND MSysObjects.Name = '{0}'
         }
 
         // Function that returns a random 36 character string that is used as the userID
-        public static string getUserID(OleDbConnection connection)
+        public static string getUserID(SqlConnection connection)
         {
             // Initialises userID as "ERROR"
             string userID = "ERROR";
@@ -142,7 +138,7 @@ AND MSysObjects.Name = '{0}'
                 userID = Guid.NewGuid().ToString();
 
                 // Creates a new object called command that can allow SQL code to be run
-                using (OleDbCommand command = new OleDbCommand())
+                using (SqlCommand command = new SqlCommand())
                 {
                     // Initialises the connection
                     command.Connection = connection;
@@ -156,7 +152,7 @@ WHERE username = @userID;
                     command.Parameters.AddWithValue("@userID", userID);
 
                     // Runs the SQL code and stores the generated table in the reader
-                    using (OleDbDataReader reader = command.ExecuteReader())
+                    using (SqlDataReader reader = command.ExecuteReader())
                     {
                         // An if statement that makes validUserID true if the reader doesn't have rows
                         if (!reader.HasRows) validUserID = true;
@@ -173,22 +169,333 @@ WHERE username = @userID;
 
     public abstract class Activity
     {
+        // Declares two string variables that store the question and answer respectively
         protected string question;
+        protected string answer;
 
+        // Declares an integer variable that stores the questionID
+        protected int questionID;
+
+        // Constructor
         public Activity()
         {
 
         }
-
-        public string weight(OleDbConnection connection, string activityType)
+        
+        // A procedure that updates the userAnswer table
+        protected void updateTblUserAnswers(SqlConnection connection, string activityType)
         {
-            // REPLACE WITH RETURNING THE QUESTION
-            return null;
+            // Opens a new connection if there isn't already a connection open (this just makes sure an error relating to no connection being open won't occur)
+            if (connection.State != ConnectionState.Open) connection.Open();
+
+            // Creates a new object called command that can allow SQL code to be run
+            using (SqlCommand command = new SqlCommand())
+            {
+                // Initialises the connection
+                command.Connection = connection;
+
+                // A SQL query that updates the userAnswer table
+                command.CommandText = @"
+-- Declares the variable @minWeight which stores the minimum value a weighting can have and initialises it as 0.25
+DECLARE @minWeight FLOAT;
+SELECT @minWeight = 0.25;
+
+-- Updates the field, weighting, from, the table, tblUserAnswers for questions that haven't been answered before
+UPDATE U
+SET weighting = 100
+FROM tblUserAnswers U
+JOIN tblQuestions Q ON U.questionID = Q.questionID
+WHERE userID = @userID AND numberOfAttempts = 0 AND Q.questionType = @questionType;
+
+-- Updates the field, weighting, from the table, tblUserAnswers
+-- I SQUARED THE WEIGHTS SO THERE WAS A BETTER SPREAD OF RESULTS
+UPDATE U
+SET weighting = POWER(1 - (numberOfCorrectAttempts / CAST(numberOfAttempts AS FLOAT)), 2)
+FROM tblUserAnswers U
+JOIN tblQuestions Q ON U.questionID = Q.questionID
+WHERE userID = @userID AND numberOfAttempts > 0 AND Q.questionType = @questionType;
+
+
+
+/*
+CATEGORY 1 = QUESTIONS THAT HAVEN'T BEEN ATTEMPTED BEFORE
+CATEGORY 2 = QUESTIONS THAT HAVE BEEN ANSWERED DECENTLY OR POORLY
+CATEGORY 3 = QUESTIONS THAT HAVE BEEN ANSWERED WELL
+*/
+
+
+
+-- Updates the field, category, from the table, tblUserAnswers, so that weightings greater than or equal to the minimum value allowed are placed in category 1
+UPDATE U
+SET category = 1
+FROM tblUserAnswers U
+JOIN tblQuestions Q ON U.questionID = Q.questionID
+WHERE userID = @userID AND numberOfAttempts = 0 AND Q.questionType = @questionType;
+
+-- Updates the field, category, from the table, tblUserAnswers, so that weightings greater than or equal to the minimum value allowed are placed in category 1
+UPDATE U
+SET category = 2
+FROM tblUserAnswers U
+JOIN tblQuestions Q ON U.questionID = Q.questionID
+WHERE userID = @userID AND weighting >= @minWeight AND numberOfAttempts > 0 AND Q.questionType = @questionType;
+
+-- Updates the field, category, from the table, tblUserAnswers, so that weightings less than the minimum value allowed are placed in category 2
+UPDATE U
+SET category = 3
+FROM tblUserAnswers U
+JOIN tblQuestions Q ON U.questionID = Q.questionID
+WHERE userID = @userID AND weighting < @minWeight AND numberOfAttempts > 0 AND Q.questionType = @questionType;
+
+-- Updates the field, weighting, from the table tblUserAnswers, so that weightings in category 2 are changed to the minimum value allowed 
+UPDATE U
+SET weighting = @minWeight
+FROM tblUserAnswers U
+JOIN tblQuestions Q ON U.questionID = Q.questionID
+WHERE userID = @userID AND category = 3 AND Q.questionType = @questionType;
+
+
+
+-- Creates a new temporary table called #weighting and uses the aggregate function SUM to calculate and store the sum of all the weightings for a particular user
+SELECT userID, SUM(weighting) AS sumWeighting
+INTO   #weighting
+FROM   tblUserAnswers U
+JOIN tblQuestions Q ON U.questionID = Q.questionID
+WHERE  userID = @userID AND Q.questionType = @questionType
+GROUP BY userID;
+
+-- Updates the field, specificWeight, from the table, tblUserAnswers
+UPDATE A
+SET    specificWeight = A.weighting / W.sumWeighting
+FROM   tblUserAnswers A
+JOIN   #weighting W ON W.userID = A.userID
+JOIN   tblQuestions Q ON A.questionID = Q.questionID
+WHERE  A.userID = @userID AND Q.questionType = @questionType;
+
+-- Drops the temporary table #weighting
+DROP TABLE #weighting;
+
+-- Creates a new temporary table called #cdf
+CREATE TABLE #cdf
+(
+seqNo           INT IDENTITY(1,1),
+userID          CHAR(36)    NOT NULL,
+questionID      INT         NOT NULL,
+specificWeight  FLOAT       NOT NULL,
+cdfPosition     FLOAT       NOT NULL
+);
+
+-- Copies the fields userID, questionID and specific weight from tblUserAnswers into the temporary table #cdf while also placing the specificWeight values into the field cdfPosition
+INSERT INTO #cdf
+SELECT U.userID, U.questionID, U.specificWeight, U.specificWeight
+FROM   tblUserAnswers U
+JOIN   tblQuestions Q ON U.questionID = Q.questionID
+WHERE  userID = @userID AND Q.questionType = @questionType;
+
+-- Declares two new variables called @count and @maxRox and initialises @count as 2 and @maxRow as the largest number in the field seqNo
+DECLARE @count  INT,
+		@maxRow INT;
+SELECT  @count = 2;
+SELECT @maxRow = MAX(seqNo) FROM #cdf;
+
+-- A while loop that keeps adding the specific weight of the previous record to the current record until a cdfPosition for every record has been established
+WHILE (@count <= @maxRow)
+BEGIN
+		UPDATE C
+		SET    cdfPosition = C.specificWeight + P.cdfPosition
+		FROM   #cdf C
+		JOIN   #cdf P ON P.seqNo = C.seqNo - 1
+		WHERE  C.seqNo = @count;
+
+		SELECT @count = @count + 1;
+END;
+
+-- Updates the field cdfPosition from the table tblUserAnswers with the cdfPosition from the temporary table #cdf
+UPDATE A
+SET cdfPosition = C.cdfPosition
+FROM tblUserAnswers A
+JOIN #cdf C ON A.questionID = C.questionID
+JOIN tblQuestions Q ON A.questionID = Q.questionID
+WHERE A.userID = @userID AND Q.questionType = @questionType;
+
+-- Drops the temporary table #cdf
+DROP TABLE #cdf;
+";
+                command.Parameters.AddWithValue("@userID", Program.userID);
+                command.Parameters.AddWithValue("@questionType", activityType);
+
+                // Runs the SQL code
+                command.ExecuteNonQuery();
+
+                // Clears the parameters
+                command.Parameters.Clear();
+            }
+
+
+
+            // Closes the connection to the database
+            connection.Close();
+        }
+
+        // A procedure that randomly picks a question depending on how well the user has previously answered the question
+        public void weight(SqlConnection connection, string activityType)
+        {
+            // Updates the userAnswer table
+            this.updateTblUserAnswers(connection, activityType);
+
+            // Opens a new connection if there isn't already a connection open (this just makes sure an error relating to no connection being open won't occur)
+            if (connection.State != ConnectionState.Open) connection.Open();
+
+            // Creates a new object called command that can allow SQL code to be run
+            using (SqlCommand command = new SqlCommand())
+            {
+                // Initialises the connection
+                command.Connection = connection;
+
+                // Declares and initialises the boolean variable found to false
+                bool found = false;
+
+                // A while loop that ensures the attributes question, answer and questionID are changed
+                while (!found)
+                {
+                    // A SQL query that randomly picks a question depending on how well the user has previously answered the question
+                    command.CommandText = @"
+-- Declares the variable @randomNumber which stores a random number between 0 and 1 and initialises it as a random number between 0 and 1
+DECLARE @randomNumber FLOAT;
+SELECT @randomNumber = RAND();
+
+-- Selects a random question and answer from tblQuestions and tblAnswers using the weighted algorithm
+SELECT Q.question, A.answer, Q.questionID
+FROM   tblUserAnswers U
+JOIN tblQuestions Q ON Q.questionID = U.questionID
+JOIN tblAnswers   A ON A.questionID = U.questionID
+WHERE  cdfPosition   >= @randomNumber 
+AND    cdfPosition    = (SELECT MIN(cdfPosition)
+                         FROM tblUserAnswers
+                         WHERE cdfPosition    >= @randomNumber
+						 AND    userID         = @userID
+						 AND    Q.questionType = @questionType)
+AND    userID         = @userID
+AND    Q.questionType = @questionType;
+";
+                    command.Parameters.AddWithValue("@userID", Program.userID);
+                    command.Parameters.AddWithValue("@questionType", activityType);
+
+                    // Runs the SQL code and stores the generated table in the reader
+                    using (SqlDataReader reader = command.ExecuteReader())
+                    {
+                        // Stores the question, answer and questionID obtained from the SELECT statement
+                        while (reader.Read())
+                        {
+                            this.question = reader.GetString(0);
+                            this.answer = reader.GetString(1);
+                            this.questionID = reader.GetInt32(2);
+
+                            // Changes the value of the boolean variable found to true
+                            found = true;
+                        }
+
+                        // Clears the parameters
+                        command.Parameters.Clear();
+
+                        // Test to see if the right question and answer is stored
+                        // MessageBox.Show(question + Environment.NewLine + answer);
+                    }
+                }
+            }
+
+
+
+            // Closes the connection to the database
+            connection.Close();
+        }
+
+        // A function that returns the value stored in the string variable question
+        public string getQuestion()
+        {
+            return this.question;
+        }
+
+        // A function that returns the value stored in the string variable answer
+        public string getAnswer()
+        {
+            return this.answer;
+        }
+
+        // A function that returns the value stored in the string variable questionID
+        public int getQuestionID()
+        {
+            return this.questionID;
+        }
+
+        // A procedure that increments the number of attempts for a certain question
+        public void incAttempts(SqlConnection connection)
+        {
+            // Opens a new connection if there isn't already a connection open (this just makes sure an error relating to no connection being open won't occur)
+            if (connection.State != ConnectionState.Open) connection.Open();
+
+            // Creates a new object called command that can allow SQL code to be run
+            using (SqlCommand command = new SqlCommand())
+            {
+                // Initialises the connection
+                command.Connection = connection;
+
+                // A SQL query that increments the number of attempts of the question
+                command.CommandText = @"
+-- Increments numberOfAttempts
+UPDATE tblUserAnswers
+SET numberOfAttempts = numberOfAttempts + 1
+WHERE questionID = @questionID
+AND userID = @userID;
+";
+                command.Parameters.AddWithValue("@questionID", this.questionID);
+                command.Parameters.AddWithValue("@userID", Program.userID);
+
+                // Runs the SQL code
+                command.ExecuteNonQuery();
+
+                // Clears the parameters
+                command.Parameters.Clear();
+            }
+        }
+
+        // A procedure that increments the number of correct attempts for a certain question
+        public void incCorrectAttempts(SqlConnection connection)
+        {
+            // Opens a new connection if there isn't already a connection open (this just makes sure an error relating to no connection being open won't occur)
+            if (connection.State != ConnectionState.Open) connection.Open();
+
+            // Creates a new object called command that can allow SQL code to be run
+            using (SqlCommand command = new SqlCommand())
+            {
+                // Initialises the connection
+                command.Connection = connection;
+
+                // A SQL query that increments the number of correct attempts of the question
+                command.CommandText = @"
+-- Increments numberOfCorrectAttempts
+UPDATE tblUserAnswers
+SET numberOfCorrectAttempts = numberOfCorrectAttempts + 1
+WHERE questionID = @questionID
+AND userID = @userID;
+";
+                command.Parameters.AddWithValue("@questionID", this.questionID);
+                command.Parameters.AddWithValue("@userID", Program.userID);
+
+                // Runs the SQL code
+                command.ExecuteNonQuery();
+
+                // Clears the parameters
+                command.Parameters.Clear();
+            }
         }
     }
 
     public class QnaActivity : Activity
     {
-        
+        // Constructor that inherits the constructor from the base class
+        public QnaActivity() : base()
+        {
+
+        }
     }
 }

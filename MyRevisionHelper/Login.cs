@@ -7,10 +7,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Data.OleDb;
+using System.Data.SqlClient;
 
 namespace MyRevisionHelper
 {
+    // ADMIN ACCOUNT DETAILS:
+    // USERNAME - admin
+    // PASSWORD - abcde
+
     public partial class Login : Form
     {
         // A global boolean variable for admin is created so this value can be used by other forms
@@ -19,9 +23,6 @@ namespace MyRevisionHelper
         public Login()
         {
             InitializeComponent();
-
-            // Admin is initialised to false
-            admin = false;
         }
 
         // Main method
@@ -32,11 +33,11 @@ namespace MyRevisionHelper
             test();
 
             // A SQL QUERY TO DROP tblTest
-            using (OleDbConnection connection = new OleDbConnection())
+            using (SqlConnection connection = new SqlConnection())
             {
                 connection.ConnectionString = Program.connectionString;
                 connection.Open();
-                using (OleDbCommand command = new OleDbCommand())
+                using (SqlCommand command = new SqlCommand())
                 {
                     command.Connection = connection;
                     command.CommandText = "DROP TABLE tblTest;";
@@ -46,14 +47,17 @@ namespace MyRevisionHelper
             }
             */
 
+            // Admin is initialised to false
+            admin = false;
+
             // Tries to create a connection to the database and otherwise catches the error and tells the user what the error is
             try
             {
                 // Declaring the connection
-                using (OleDbConnection connection = new OleDbConnection())
+                using (SqlConnection connection = new SqlConnection())
                 {
 
-                    // This allows us to connect to Access 2007
+                    // This allows us to connect to SQL Server
                     connection.ConnectionString = Program.connectionString;
                     
                     // Opens the connection to the database
@@ -64,7 +68,7 @@ namespace MyRevisionHelper
 
                     /*
                     // CODE BELOW RESETS THE TABLE
-                    using (OleDbCommand command = new OleDbCommand())
+                    using (SqlCommand command = new SqlCommand())
                     {
                         command.Connection = connection;
                         command.CommandText = "DROP TABLE tblUsers;";
@@ -75,7 +79,7 @@ namespace MyRevisionHelper
 
 
                     // Creates a new object called command that can allow SQL code to be run
-                    using (OleDbCommand command = new OleDbCommand())
+                    using (SqlCommand command = new SqlCommand())
                     {
                         // Initialises the connection
                         command.Connection = connection;
@@ -87,11 +91,11 @@ namespace MyRevisionHelper
                             command.CommandText = @"
 CREATE TABLE tblUsers
 (
-userID          CHAR(36)    NOT NULL    PRIMARY KEY,
-username        VARCHAR(64) NOT NULL,
-hPassword       LONGBINARY  NOT NULL,
-salt            LONGBINARY  NOT NULL,
-admin           BIT         NOT NULL
+userID          CHAR(36)        NOT NULL    PRIMARY KEY,
+username        VARCHAR(32)     NOT NULL,
+hPassword       BINARY(32)		NOT NULL,
+salt            BINARY(32)      NOT NULL,
+userAdmin       BIT             NOT NULL
 );
 ";
                             // Runs the SQL code
@@ -123,6 +127,101 @@ VALUES (@userID, 'admin', @hPassword, @salt, 1);
                             // Clears the parameters
                             command.Parameters.Clear();
                         }
+
+                        /*
+                        // Message boxes that test whether the function getTableExists() works
+                        MessageBox.Show(Program.getTableExists(connection, "tblCounters").ToString());
+                        MessageBox.Show(Program.getTableExists(connection, "tblQuestions").ToString());
+                        MessageBox.Show(Program.getTableExists(connection, "tblAnswers").ToString());
+                        MessageBox.Show(Program.getTableExists(connection, "tblUserAnswers").ToString());
+                        */
+
+                        // Creates a new counter table if it doesn't already exist
+                        if (!Program.getTableExists(connection, "tblCounters"))
+                        {
+                            // A SQL query that creates a counter table
+                            command.CommandText = @"
+-- Creates a counter table
+CREATE TABLE tblCounters
+(
+counterType		VARCHAR(8)		NOT NULL,
+counterID		INT				NOT NULL
+);
+
+-- Initialises the two counters as 1
+INSERT INTO tblCounters VALUES ('QID', 1);
+INSERT INTO tblCounters VALUES ('AID', 1);
+";
+                            // Runs the SQL code
+                            command.ExecuteNonQuery();
+                        }
+
+
+
+                        // Creates a new question table if it doesn't already exist
+                        if (!Program.getTableExists(connection, "tblQuestions"))
+                        {
+                            // A SQL query that creates a question table
+                            command.CommandText = @"
+-- Creates a question table
+CREATE TABLE tblQuestions
+(
+questionID      INT         NOT NULL    PRIMARY KEY,
+question        TEXT        NOT NULL,
+questionType    VARCHAR(8)  NOT NULL
+);
+";
+                            // Runs the SQL code
+                            command.ExecuteNonQuery();
+                        }
+
+
+
+                        // Creates a new answer table if it doesn't already exist
+                        if (!Program.getTableExists(connection, "tblAnswers"))
+                        {
+                            // A SQL query that creates an answer table
+                            command.CommandText = @"
+-- Creates an answer table
+CREATE TABLE tblAnswers
+(
+answerID        INT         NOT NULL    PRIMARY KEY,
+answer          TEXT        NOT NULL,
+answerType      VARCHAR(8)  NOT NULL,
+questionID      INT         NOT NULL REFERENCES tblQuestions (questionID),
+);
+";
+                            // Runs the SQL code
+                            command.ExecuteNonQuery();
+                        }
+
+
+
+                        // Creates a new userAnswers table if it doesn't already exist
+                        if (!Program.getTableExists(connection, "tblUserAnswers"))
+                        {
+                            // A SQL query that creates an answer table
+                            command.CommandText = @"
+-- Creates a userAnswer table
+CREATE TABLE tblUserAnswers
+(
+userID						CHAR(36)    NOT NULL	REFERENCES  tblUsers (userID),
+questionID					INT         NOT NULL    REFERENCES  tblQuestions (questionID),
+numberOfAttempts			INT			NOT NULL,
+numberOfCorrectAttempts		INT			NOT NULL,
+weighting					FLOAT,
+category                    INT,
+specificWeight				FLOAT,
+cdfPosition					FLOAT,
+PRIMARY KEY (userID, questionID)
+);
+";
+                            // Runs the SQL code
+                            command.ExecuteNonQuery();
+
+                            // Calls upon the procedure addDefaultQs() to add the default questions to the database
+                            addDefaultQs(connection);
+                        }
                     }
 
 
@@ -137,20 +236,72 @@ VALUES (@userID, 'admin', @hPassword, @salt, 1);
             }
         }
 
+        // A procedure that adds questions and answers into the database
+        private void createQNA(SqlConnection connection, string question, string answer)
+        {
+            // Opens a new connection if there isn't already a connection open (this just makes sure an error relating to no connection being open won't occur)
+            if (connection.State != ConnectionState.Open) connection.Open();
+
+            // Creates a new object called command that can allow SQL code to be run
+            using (SqlCommand command = new SqlCommand())
+            {
+                // Initialises the connection
+                command.Connection = connection;
+
+                // A SQL query that inputs data
+                command.CommandText = @"
+-- Declares a new variable called @questionCount and initialises it as the value in the question counter table
+DECLARE @questionCount INT;
+SELECT @questionCount = MAX(counterID) FROM tblCounters WHERE counterType = 'QID';
+
+-- Inserts a new question into the question table
+INSERT INTO tblQuestions (questionID, question, questionType)
+VALUES (@questionCount, @question, @questionType);
+
+-- Increments the question counter
+UPDATE C
+SET counterID = counterID + 1
+FROM tblCounters C
+WHERE counterType = 'QID';
+
+-- Declares a new variable called @answerCount and initialises it as the value in the answer counter table
+DECLARE @answerCount INT;
+SELECT @answerCount = MAX(counterID) FROM tblCounters WHERE counterType = 'AID';
+
+-- Inserts a new answer into the answer table
+INSERT INTO tblAnswers (answerID, answer, answerType, questionID)
+VALUES(@answerCount, @answer, @answerType, @questionCount);
+
+-- Increments the answer counter
+UPDATE C
+SET counterID = counterID + 1
+FROM tblCounters C
+WHERE counterType = 'AID';
+";
+                command.Parameters.AddWithValue("@question", question);
+                command.Parameters.AddWithValue("@questionType", "QNA");
+                command.Parameters.AddWithValue("@answer", answer);
+                command.Parameters.AddWithValue("@answerType", "QNA");
+
+                // Runs the SQL code
+                command.ExecuteNonQuery();
+            }
+        }
+
         /*
         // A TEST TO FIND THE BEST METHOD TO STORE THE SALT
         private void test()
         {
-            using (OleDbConnection connection = new OleDbConnection())
+            using (SqlConnection connection = new SqlConnection())
             {
-                // This allows us to connect to Access 2007
+                // This allows us to connect to SQL Server
                 connection.ConnectionString = Program.connectionString;
 
                 // Opens a new connection if there isn't already a connection open (this just makes sure an error relating to no connection being open won't occur)
                 if (connection.State != ConnectionState.Open) connection.Open();
 
                 // Creates a new object called command that can allow SQL code to be run
-                using (OleDbCommand command = new OleDbCommand())
+                using (SqlCommand command = new SqlCommand())
                 {
                     // Initialises the connection
                     command.Connection = connection;
@@ -183,7 +334,7 @@ FROM tblTest;
 ";
 
                     // Runs the SQL code and stores the generated table in the reader
-                    using (OleDbDataReader reader = command.ExecuteReader())
+                    using (SqlDataReader reader = command.ExecuteReader())
                     {
                         // Tries to find a match for username and password in tblUsers and returns true if found and false if not found
                         while (reader.Read())
@@ -220,7 +371,7 @@ FROM tblTest;
         }
 
         // A function that returns the new user's userID
-        private string getUserID(OleDbConnection connection)
+        private string getUserID(SqlConnection connection)
         {
             // Calls the function at application scope
             return UserLogin.getUserID(connection);
@@ -233,17 +384,56 @@ FROM tblTest;
         }
 
         // Function that returns whether a certain table exists
-        private bool getTableExists(OleDbConnection connection, string tableName)
+        private bool getTableExists(SqlConnection connection, string tableName)
         {
             return Program.getTableExists(connection, tableName);
         }
 
         // Method that opens a new form that allows the user to create a new account
-        private void newLoginLbl_Click(object sender, EventArgs e)
+        private void newLogin_lbl_Click(object sender, EventArgs e)
         {
+            // Creates a new new user form
             NewUser newForm = new NewUser();
+
+            // Hides the main menu form
             this.Hide();
-            newForm.ShowDialog();
+
+            if (newForm.ShowDialog() == DialogResult.OK)
+            {
+                // Tries to create a connection to the database and otherwise catches the error and tells the user what the error is
+                try
+                {
+                    // Declaring the connection
+                    using (SqlConnection connection = new SqlConnection())
+                    {
+
+                        // This allows us to connect to SQL Server
+                        connection.ConnectionString = Program.connectionString;
+
+                        // Opens the connection to the database
+                        connection.Open();
+
+
+
+                        // Calls the procedure initialiseQs()
+                        initialiseQs(connection, newForm.newUserID, 1, 16);
+
+
+
+                        // Closes the connection to the database
+                        connection.Close();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error:\n\n" + ex);
+                }
+            }
+
+            // Releases all resources used by the new form
+            newForm.Dispose();
+
+            // Makes the login form visible again
             this.Show();
         }
 
@@ -257,9 +447,9 @@ FROM tblTest;
                 try
                 {
                     // Declaring the connection
-                    using (OleDbConnection connection = new OleDbConnection())
+                    using (SqlConnection connection = new SqlConnection())
                     {
-                        // This allows us to connect to Access 2007
+                        // This allows us to connect to SQL Server
                         connection.ConnectionString = Program.connectionString;
 
                         // Opens the connection to the database
@@ -299,13 +489,13 @@ FROM tblTest;
         }
 
         // Function that returns a boolean value depending on whether or not the user's details match the details in tblUsers
-        private bool getIsAuthenticated(OleDbConnection connection, string username, string password)
+        private bool getIsAuthenticated(SqlConnection connection, string username, string password)
         {
             // Opens a new connection if there isn't already a connection open (this just makes sure an error relating to no connection being open won't occur)
             if (connection.State != ConnectionState.Open) connection.Open();
 
             // Creates a new object called command that can allow SQL code to be run
-            using (OleDbCommand command = new OleDbCommand())
+            using (SqlCommand command = new SqlCommand())
             {
                 // Initialises the connection
                 command.Connection = connection;
@@ -319,7 +509,7 @@ WHERE username = @username;
                 command.Parameters.AddWithValue("@username", username_textbox.Text);
 
                 // Runs the SQL code and stores the generated table in the reader
-                using (OleDbDataReader reader = command.ExecuteReader())
+                using (SqlDataReader reader = command.ExecuteReader())
                 {
                     // Creates a new boolean variable called match, which is initialised to false
                     bool match = false;
@@ -361,11 +551,109 @@ WHERE username = @username;
         }
 
         // Method that sets the global boolean variable guest to true and redirects the user to the main menu form
-        private void guestLbl_Click(object sender, EventArgs e)
+        private void guest_lbl_Click(object sender, EventArgs e)
         {
             DialogResult = DialogResult.OK;
             Program.guest = true;
             this.Close();
+        }
+
+        // Adds the default questions and initialises them for each user
+        private void addDefaultQs(SqlConnection connection)
+        {
+            // Inserts default questions and answers into the database
+            createQNA(connection, "What particle is the only stable baryon?", "PROTON");
+            createQNA(connection, "What do you call a hadron that consists of 3 quarks?", "BARYON");
+            createQNA(connection, "What do you call a hadron that consists of a quark-antiquark pair?", "MESON");
+            createQNA(connection, "What baryon has a quark composition of udd?", "NEUTRON");
+            createQNA(connection, "What baryon has a quark composition of uud?", "PROTON");
+            createQNA(connection, "What is the antiparticle of an electron?", "POSITRON");
+            createQNA(connection, "What particles don't experience the strong force?", "LEPTONS");
+            createQNA(connection, "What do you call a wave where the oscillations travel perpendicular to the direction of propagation?", "TRANSVERSE");
+            createQNA(connection, "What do you call a wave where the oscillations travel parallel to the direction of propagation?", "LONGITUDINAL");
+            createQNA(connection, "What do you call two waves with the same wavelength?", "MONOCHROMATIC");
+            createQNA(connection, "What do you call two waves with the same wavelength and a fixed phase difference?", "COHERENT");
+            createQNA(connection, "What is the term used to describe the distance between two adjacent peaks on a wave?", "WAVELENGTH");
+            createQNA(connection, "What is the term used to describe the maximum displacement of the wave from its equilibrium position?", "AMPLITUDE");
+            createQNA(connection, "What do you call a point on a stationary wave where the displacement is 0?", "NODE");
+            createQNA(connection, "What do you call a point on a stationary wave with maximum displacement?", "ANTINODE");
+            createQNA(connection, "What is the term used to describe the spreading out of waves when they pass through or around a gap?", "DIFFRACTION");
+
+            // Opens a new connection if there isn't already a connection open (this just makes sure an error relating to no connection being open won't occur)
+            if (connection.State != ConnectionState.Open) connection.Open();
+
+            // Creates a new object called command that can allow SQL code to be run
+            using (SqlCommand command = new SqlCommand())
+            {
+                // Initialises the connection
+                command.Connection = connection;
+
+                // A SQL query that selects all the users from the table tblusers
+                command.CommandText = @"
+SELECT userID
+FROM tblUsers;
+";
+                // Runs the SQL code and stores the generated table in the reader
+                using (SqlDataReader reader = command.ExecuteReader())
+                {
+                    // Creates new rows for each user for each default question
+                    while (reader.Read())
+                    {
+                        // Declaring a new connection
+                        using (SqlConnection connection2 = new SqlConnection())
+                        {
+                            // This allows us to connect to SQL Server
+                            connection2.ConnectionString = Program.connectionString;
+
+                            // Opens the connection to the database
+                            connection2.Open();
+
+
+
+                            // Calls the procedure initialiseQs()
+                            initialiseQs(connection2, reader.GetString(0), 1, 16);
+
+
+                            
+                            // Closes the connection to the database
+                            connection2.Close();
+                        }
+                    }
+                }
+            }
+        }
+
+        // Initialises the questions within the range given in as parameters for the user given in the parameter
+        private void initialiseQs(SqlConnection connection, string aUserID, int minQ, int maxQ)
+        {
+            // Opens a new connection if there isn't already a connection open (this just makes sure an error relating to no connection being open won't occur)
+            if (connection.State != ConnectionState.Open) connection.Open();
+
+            // Creates a new object called command that can allow SQL code to be run
+            using (SqlCommand command = new SqlCommand())
+            {
+                // Initialises the connection
+                command.Connection = connection;
+
+                // A SQL query that initialises the questions
+                command.CommandText = @"
+WHILE @min <= @max
+BEGIN
+    INSERT INTO tblUserAnswers (userID, questionID, numberOfAttempts, numberOfCorrectAttempts)
+    VALUES (@userID, @min, 0, 0);
+    SELECT @min = @min + 1;
+END
+";
+                command.Parameters.AddWithValue("@userID", aUserID);
+                command.Parameters.AddWithValue("@min", minQ);
+                command.Parameters.AddWithValue("@max", maxQ);
+
+                // Runs the SQL code
+                command.ExecuteNonQuery();
+
+                // Clears the parameters
+                command.Parameters.Clear();
+            }
         }
     }
 }

@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.goBackLbl = new System.Windows.Forms.Label();
+            this.goBack_lbl = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.username_textbox = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
@@ -36,15 +36,15 @@
             this.confirm_btn = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
-            // goBackLbl
+            // goBack_lbl
             // 
-            this.goBackLbl.AutoSize = true;
-            this.goBackLbl.Location = new System.Drawing.Point(5, 5);
-            this.goBackLbl.Name = "goBackLbl";
-            this.goBackLbl.Size = new System.Drawing.Size(172, 13);
-            this.goBackLbl.TabIndex = 0;
-            this.goBackLbl.Text = "Click here to go back to login page";
-            this.goBackLbl.Click += new System.EventHandler(this.goBackLbl_Click);
+            this.goBack_lbl.AutoSize = true;
+            this.goBack_lbl.Location = new System.Drawing.Point(5, 5);
+            this.goBack_lbl.Name = "goBack_lbl";
+            this.goBack_lbl.Size = new System.Drawing.Size(172, 13);
+            this.goBack_lbl.TabIndex = 0;
+            this.goBack_lbl.Text = "Click here to go back to login page";
+            this.goBack_lbl.Click += new System.EventHandler(this.goBack_lbl_Click);
             // 
             // label1
             // 
@@ -98,7 +98,7 @@
             this.Controls.Add(this.label2);
             this.Controls.Add(this.username_textbox);
             this.Controls.Add(this.label1);
-            this.Controls.Add(this.goBackLbl);
+            this.Controls.Add(this.goBack_lbl);
             this.Name = "NewUser";
             this.Text = "NewUser";
             this.Load += new System.EventHandler(this.NewUser_Load);
@@ -109,7 +109,7 @@
 
         #endregion
 
-        private System.Windows.Forms.Label goBackLbl;
+        private System.Windows.Forms.Label goBack_lbl;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.TextBox username_textbox;
         private System.Windows.Forms.Label label2;

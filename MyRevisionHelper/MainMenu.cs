@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Data.SqlClient;
 
 namespace MyRevisionHelper
 {
@@ -20,6 +21,43 @@ namespace MyRevisionHelper
         // Main method
         private void MainMenu_Load(object sender, EventArgs e)
         {
+            // CONNECTION TEMPLATE
+            /*
+            // Tries to create a connection to the database and otherwise catches the error and tells the user what the error is
+            try
+            {
+                // Declaring the connection
+                using (SqlConnection connection = new SqlConnection())
+                {
+
+                    // This allows us to connect to SQL Server
+                    connection.ConnectionString = Program.connectionString;
+
+                    // Opens the connection to the database
+                    connection.Open();
+
+
+
+                    // Creates a new object called command that can allow SQL code to be run
+                    using (SqlCommand command = new SqlCommand())
+                    {
+                        // Initialises the connection
+                        command.Connection = connection;
+
+                    }
+
+
+
+                    // Closes the connection to the database
+                    connection.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error:\n\n" + ex);
+            }
+            */
+
             // Setting button colours
             qna_btn.BackColor = Color.LightGreen;
             qna_btn.FlatStyle = FlatStyle.Flat;
@@ -92,6 +130,100 @@ namespace MyRevisionHelper
 
                 // Releases all resources used by the new form
                 newForm.Dispose();
+
+                // Inserts some data into tblUserAnswers
+                /*
+                // Tries to create a connection to the database and otherwise catches the error and tells the user what the error is
+                try
+                {
+                    // Declaring the connection
+                    using (SqlConnection connection = new SqlConnection())
+                    {
+
+                        // This allows us to connect to SQL Server
+                        connection.ConnectionString = Program.connectionString;
+
+                        // Opens the connection to the database
+                        connection.Open();
+
+
+
+                        // Creates a new object called command that can allow SQL code to be run
+                        using (SqlCommand command = new SqlCommand())
+                        {
+                            // Initialises the connection
+                            command.Connection = connection;
+
+                            // A SQL query that inserts some data into tblUserAnswers
+                            command.CommandText = @"
+INSERT INTO tblUserAnswers (userID, questionID, numberOfAttempts, numberOfCorrectAttempts)
+VALUES (@userID, 1, 16, 5);
+
+INSERT INTO tblUserAnswers (userID, questionID, numberOfAttempts, numberOfCorrectAttempts)
+VALUES (@userID, 2, 11, 4);
+
+INSERT INTO tblUserAnswers (userID, questionID, numberOfAttempts, numberOfCorrectAttempts)
+VALUES (@userID, 3, 15, 14);
+
+INSERT INTO tblUserAnswers (userID, questionID, numberOfAttempts, numberOfCorrectAttempts)
+VALUES (@userID, 4, 4, 1);
+
+INSERT INTO tblUserAnswers (userID, questionID, numberOfAttempts, numberOfCorrectAttempts)
+VALUES (@userID, 5, 5, 3);
+
+INSERT INTO tblUserAnswers (userID, questionID, numberOfAttempts, numberOfCorrectAttempts)
+VALUES (@userID, 6, 8, 4);
+
+INSERT INTO tblUserAnswers (userID, questionID, numberOfAttempts, numberOfCorrectAttempts)
+VALUES (@userID, 7, 7, 6);
+
+INSERT INTO tblUserAnswers (userID, questionID, numberOfAttempts, numberOfCorrectAttempts)
+VALUES (@userID, 8, 12, 1);
+
+INSERT INTO tblUserAnswers (userID, questionID, numberOfAttempts, numberOfCorrectAttempts)
+VALUES (@userID, 9, 15, 0);
+
+INSERT INTO tblUserAnswers (userID, questionID, numberOfAttempts, numberOfCorrectAttempts)
+VALUES (@userID, 10, 20, 0);
+
+INSERT INTO tblUserAnswers (userID, questionID, numberOfAttempts, numberOfCorrectAttempts)
+VALUES (@userID, 11, 15, 15);
+
+INSERT INTO tblUserAnswers (userID, questionID, numberOfAttempts, numberOfCorrectAttempts)
+VALUES (@userID, 12, 20, 20);
+
+INSERT INTO tblUserAnswers (userID, questionID, numberOfAttempts, numberOfCorrectAttempts)
+VALUES (@userID, 13, 0, 0);
+
+INSERT INTO tblUserAnswers (userID, questionID, numberOfAttempts, numberOfCorrectAttempts)
+VALUES (@userID, 14, 20, 2);
+
+INSERT INTO tblUserAnswers (userID, questionID, numberOfAttempts, numberOfCorrectAttempts)
+VALUES (@userID, 15, 24, 1);
+
+INSERT INTO tblUserAnswers (userID, questionID, numberOfAttempts, numberOfCorrectAttempts)
+VALUES (@userID, 16, 0, 0);
+";
+                            command.Parameters.AddWithValue("@userID", Program.userID);
+
+                            // Runs the SQL code
+                            command.ExecuteNonQuery();
+                            
+                            // Clears the parameters
+                            command.Parameters.Clear();
+                        }
+
+
+
+                        // Closes the connection to the database
+                        connection.Close();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error:\n\n" + ex);
+                }
+                */
             }
 
             // Makes the main menu form visible again
