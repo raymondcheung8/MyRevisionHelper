@@ -29,7 +29,6 @@ namespace MyRevisionHelper
                 // Declaring the connection
                 using (SqlConnection connection = new SqlConnection())
                 {
-
                     // This allows us to connect to SQL Server
                     connection.ConnectionString = Program.connectionString;
 
@@ -104,186 +103,259 @@ namespace MyRevisionHelper
         private void login_btn_Click(object sender, EventArgs e)
         {
             // Creates a new login form
-            Login newForm = new Login();
-
-            // Hides the main menu form
-            this.Hide();
-
-            // Displays the new login form
-            if (newForm.ShowDialog() == DialogResult.OK)
+            using (Login newForm = new Login())
             {
-                // Shows all the regular buttons
-                qna_btn.Show();
-                wordedQ_btn.Show();
-                mathQ_btn.Show();
-                timedMC_btn.Show();
-                break_btn.Show();
 
-                // Shows the notes button if the user isn't a guest
-                if (!Program.guest) notes_btn.Show();
+                // Hides the main menu form
+                this.Hide();
 
-                // Hides the login button
-                login_btn.Hide();
-
-                // Shows the create button if the user is an admin
-                if (newForm.admin) create_btn.Show();
-
-                // Releases all resources used by the new form
-                newForm.Dispose();
-
-                // Inserts some data into tblUserAnswers
-                /*
-                // Tries to create a connection to the database and otherwise catches the error and tells the user what the error is
-                try
+                // Displays the new login form
+                if (newForm.ShowDialog() == DialogResult.OK)
                 {
-                    // Declaring the connection
-                    using (SqlConnection connection = new SqlConnection())
+                    // Shows all the regular buttons
+                    qna_btn.Show();
+                    wordedQ_btn.Show();
+                    mathQ_btn.Show();
+                    timedMC_btn.Show();
+                    break_btn.Show();
+
+                    // Shows the notes button if the user isn't a guest
+                    if (!Program.guest) notes_btn.Show();
+
+                    // Hides the login button
+                    login_btn.Hide();
+
+                    // Shows the create button if the user is an admin
+                    if (newForm.admin) create_btn.Show();
+
+                    // Releases all resources used by the new form
+                    newForm.Dispose();
+
+                    // Inserts some data into tblUserAnswers
+                    /*
+                    // Tries to create a connection to the database and otherwise catches the error and tells the user what the error is
+                    try
                     {
-
-                        // This allows us to connect to SQL Server
-                        connection.ConnectionString = Program.connectionString;
-
-                        // Opens the connection to the database
-                        connection.Open();
-
-
-
-                        // Creates a new object called command that can allow SQL code to be run
-                        using (SqlCommand command = new SqlCommand())
+                        // Declaring the connection
+                        using (SqlConnection connection = new SqlConnection())
                         {
-                            // Initialises the connection
-                            command.Connection = connection;
 
-                            // A SQL query that inserts some data into tblUserAnswers
-                            command.CommandText = @"
-INSERT INTO tblUserAnswers (userID, questionID, numberOfAttempts, numberOfCorrectAttempts)
-VALUES (@userID, 1, 16, 5);
+                            // This allows us to connect to SQL Server
+                            connection.ConnectionString = Program.connectionString;
 
-INSERT INTO tblUserAnswers (userID, questionID, numberOfAttempts, numberOfCorrectAttempts)
-VALUES (@userID, 2, 11, 4);
+                            // Opens the connection to the database
+                            connection.Open();
 
-INSERT INTO tblUserAnswers (userID, questionID, numberOfAttempts, numberOfCorrectAttempts)
-VALUES (@userID, 3, 15, 14);
 
-INSERT INTO tblUserAnswers (userID, questionID, numberOfAttempts, numberOfCorrectAttempts)
-VALUES (@userID, 4, 4, 1);
 
-INSERT INTO tblUserAnswers (userID, questionID, numberOfAttempts, numberOfCorrectAttempts)
-VALUES (@userID, 5, 5, 3);
+                            // Creates a new object called command that can allow SQL code to be run
+                            using (SqlCommand command = new SqlCommand())
+                            {
+                                // Initialises the connection
+                                command.Connection = connection;
 
-INSERT INTO tblUserAnswers (userID, questionID, numberOfAttempts, numberOfCorrectAttempts)
-VALUES (@userID, 6, 8, 4);
+                                // A SQL query that inserts some data into tblUserAnswers
+                                command.CommandText = @"
+    INSERT INTO tblUserAnswers (userID, questionID, numberOfAttempts, numberOfCorrectAttempts)
+    VALUES (@userID, 1, 16, 5);
 
-INSERT INTO tblUserAnswers (userID, questionID, numberOfAttempts, numberOfCorrectAttempts)
-VALUES (@userID, 7, 7, 6);
+    INSERT INTO tblUserAnswers (userID, questionID, numberOfAttempts, numberOfCorrectAttempts)
+    VALUES (@userID, 2, 11, 4);
 
-INSERT INTO tblUserAnswers (userID, questionID, numberOfAttempts, numberOfCorrectAttempts)
-VALUES (@userID, 8, 12, 1);
+    INSERT INTO tblUserAnswers (userID, questionID, numberOfAttempts, numberOfCorrectAttempts)
+    VALUES (@userID, 3, 15, 14);
 
-INSERT INTO tblUserAnswers (userID, questionID, numberOfAttempts, numberOfCorrectAttempts)
-VALUES (@userID, 9, 15, 0);
+    INSERT INTO tblUserAnswers (userID, questionID, numberOfAttempts, numberOfCorrectAttempts)
+    VALUES (@userID, 4, 4, 1);
 
-INSERT INTO tblUserAnswers (userID, questionID, numberOfAttempts, numberOfCorrectAttempts)
-VALUES (@userID, 10, 20, 0);
+    INSERT INTO tblUserAnswers (userID, questionID, numberOfAttempts, numberOfCorrectAttempts)
+    VALUES (@userID, 5, 5, 3);
 
-INSERT INTO tblUserAnswers (userID, questionID, numberOfAttempts, numberOfCorrectAttempts)
-VALUES (@userID, 11, 15, 15);
+    INSERT INTO tblUserAnswers (userID, questionID, numberOfAttempts, numberOfCorrectAttempts)
+    VALUES (@userID, 6, 8, 4);
 
-INSERT INTO tblUserAnswers (userID, questionID, numberOfAttempts, numberOfCorrectAttempts)
-VALUES (@userID, 12, 20, 20);
+    INSERT INTO tblUserAnswers (userID, questionID, numberOfAttempts, numberOfCorrectAttempts)
+    VALUES (@userID, 7, 7, 6);
 
-INSERT INTO tblUserAnswers (userID, questionID, numberOfAttempts, numberOfCorrectAttempts)
-VALUES (@userID, 13, 0, 0);
+    INSERT INTO tblUserAnswers (userID, questionID, numberOfAttempts, numberOfCorrectAttempts)
+    VALUES (@userID, 8, 12, 1);
 
-INSERT INTO tblUserAnswers (userID, questionID, numberOfAttempts, numberOfCorrectAttempts)
-VALUES (@userID, 14, 20, 2);
+    INSERT INTO tblUserAnswers (userID, questionID, numberOfAttempts, numberOfCorrectAttempts)
+    VALUES (@userID, 9, 15, 0);
 
-INSERT INTO tblUserAnswers (userID, questionID, numberOfAttempts, numberOfCorrectAttempts)
-VALUES (@userID, 15, 24, 1);
+    INSERT INTO tblUserAnswers (userID, questionID, numberOfAttempts, numberOfCorrectAttempts)
+    VALUES (@userID, 10, 20, 0);
 
-INSERT INTO tblUserAnswers (userID, questionID, numberOfAttempts, numberOfCorrectAttempts)
-VALUES (@userID, 16, 0, 0);
-";
-                            command.Parameters.AddWithValue("@userID", Program.userID);
+    INSERT INTO tblUserAnswers (userID, questionID, numberOfAttempts, numberOfCorrectAttempts)
+    VALUES (@userID, 11, 15, 15);
 
-                            // Runs the SQL code
-                            command.ExecuteNonQuery();
+    INSERT INTO tblUserAnswers (userID, questionID, numberOfAttempts, numberOfCorrectAttempts)
+    VALUES (@userID, 12, 20, 20);
+
+    INSERT INTO tblUserAnswers (userID, questionID, numberOfAttempts, numberOfCorrectAttempts)
+    VALUES (@userID, 13, 0, 0);
+
+    INSERT INTO tblUserAnswers (userID, questionID, numberOfAttempts, numberOfCorrectAttempts)
+    VALUES (@userID, 14, 20, 2);
+
+    INSERT INTO tblUserAnswers (userID, questionID, numberOfAttempts, numberOfCorrectAttempts)
+    VALUES (@userID, 15, 24, 1);
+
+    INSERT INTO tblUserAnswers (userID, questionID, numberOfAttempts, numberOfCorrectAttempts)
+    VALUES (@userID, 16, 0, 0);
+    ";
+                                command.Parameters.AddWithValue("@userID", Program.userID);
+
+                                // Runs the SQL code
+                                command.ExecuteNonQuery();
                             
-                            // Clears the parameters
-                            command.Parameters.Clear();
+                                // Clears the parameters
+                                command.Parameters.Clear();
+                            }
+
+
+
+                            // Closes the connection to the database
+                            connection.Close();
                         }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show("Error:\n\n" + ex);
+                    }
+                    */
+
+                    if (!Program.guest)
+                    {
+                        // This makes sure questions have been initialised for the current user in tblUserAnswers and otherwise initialises the tables for them
+                        // (This is basically a fail-safe to make sure I won't get any errors relating to questions not being initialised for the current user)
+                        // Tries to create a connection to the database and otherwise catches the error and tells the user what the error is
+                        try
+                        {
+                            // Declaring the connection
+                            using (SqlConnection connection = new SqlConnection())
+                            {
+
+                                // This allows us to connect to SQL Server
+                                connection.ConnectionString = Program.connectionString;
+
+                                // Opens the connection to the database
+                                connection.Open();
 
 
 
-                        // Closes the connection to the database
-                        connection.Close();
+                                // Creates a new object called command that can allow SQL code to be run
+                                using (SqlCommand command = new SqlCommand())
+                                {
+                                    // Initialises the connection
+                                    command.Connection = connection;
+
+                                    // A SQL query that makes sure questions have been initialised for the current user in tblUserAnswers and otherwise initialises the tables for them
+                                    // (This is basically a fail-safe to make sure I won't get any errors relating to questions not being initialised for the current user)
+                                    command.CommandText = @"
+INSERT tblUserAnswers
+SELECT @userID, Q.questionID, 0, 0, NULL, NULL, NULL, NULL
+FROM   tblQuestions Q
+WHERE  NOT EXISTS (SELECT 1
+                   FROM   tblUserAnswers A
+				   WHERE  A.questionID = Q.questionID
+				   AND    A.userID     = @userID);
+";
+                                    command.Parameters.AddWithValue("@userID", Program.userID);
+
+                                    // Runs the SQL code
+                                    command.ExecuteNonQuery();
+
+                                    // Clears the parameters
+                                    command.Parameters.Clear();
+                                }
+
+
+
+                                // Closes the connection to the database
+                                connection.Close();
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show("Error:\n\n" + ex);
+                        }
                     }
                 }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("Error:\n\n" + ex);
-                }
-                */
-            }
 
-            // Makes the main menu form visible again
-            this.Show();
+                // Makes the main menu form visible again
+                this.Show();
+            }
         }
 
         // Method for what happens when qna_btn is clicked
         private void qna_btn_Click(object sender, EventArgs e)
         {
             // Display a new form and hide the main menu
-            Qna newForm = new Qna();
-            openNewForm(newForm);
+            using (Qna newForm = new Qna())
+            {
+                openNewForm(newForm);
+            }
         }
 
         // Method for what happens when wordedQ_btn is clicked
         private void wordedQ_btn_Click(object sender, EventArgs e)
         {
             // Display a new form and hide the main menu
-            WordedQ newForm = new WordedQ();
-            openNewForm(newForm);
+            using (WordedQ newForm = new WordedQ())
+            {
+                openNewForm(newForm);
+            }
         }
 
         // Method for what happens when mathQ_btn is clicked
         private void mathQ_btn_Click(object sender, EventArgs e)
         {
             // Display a new form and hide the main menu
-            MathQ newForm = new MathQ();
-            openNewForm(newForm);
+            using (MathQ newForm = new MathQ())
+            {
+                openNewForm(newForm);
+            }
         }
 
         // Method for what happens when timedMC_btn is clicked
         private void timedMC_btn_Click(object sender, EventArgs e)
         {
             // Display a new form and hide the main menu
-            TimedMC newForm = new TimedMC();
-            openNewForm(newForm);
+            using (TimedMC newForm = new TimedMC())
+            {
+                openNewForm(newForm);
+            }
         }
 
         // Method for what happens when create_btn is clicked
         private void create_btn_Click(object sender, EventArgs e)
         {
             // Display a new form and hide the main menu
-            Create newForm = new Create();
-            openNewForm(newForm);
+            using (Create newForm = new Create())
+            {
+                openNewForm(newForm);
+            }
         }
 
         // Method for what happens when notes_btn is clicked
         private void notes_btn_Click(object sender, EventArgs e)
         {
             // Display a new form and hide the main menu
-            Notes newForm = new Notes();
-            openNewForm(newForm);
+            using (Notes newForm = new Notes())
+            {
+                openNewForm(newForm);
+            }
         }
 
         // Method for what happens when break_btn is clicked
         private void break_btn_Click(object sender, EventArgs e)
         {
             // Display a new form and hide the main menu
-            Break newForm = new Break();
-            openNewForm(newForm);
+            using (Break newForm = new Break())
+            {
+                openNewForm(newForm);
+            }
         }
 
         // Method for what happens when exit_btn is clicked

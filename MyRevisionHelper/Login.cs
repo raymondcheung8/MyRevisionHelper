@@ -47,7 +47,7 @@ namespace MyRevisionHelper
             }
             */
 
-            // Admin is initialised to false
+            // admin is initialised to false
             admin = false;
 
             // Tries to create a connection to the database and otherwise catches the error and tells the user what the error is
@@ -209,10 +209,10 @@ userID						CHAR(36)    NOT NULL	REFERENCES  tblUsers (userID),
 questionID					INT         NOT NULL    REFERENCES  tblQuestions (questionID),
 numberOfAttempts			INT			NOT NULL,
 numberOfCorrectAttempts		INT			NOT NULL,
-weighting					FLOAT,
-category                    INT,
-specificWeight				FLOAT,
-cdfPosition					FLOAT,
+weighting					FLOAT       NULL,
+category                    INT         NULL,
+specificWeight				FLOAT       NULL,
+cdfPosition					FLOAT       NULL,
 PRIMARY KEY (userID, questionID)
 );
 ";
@@ -236,6 +236,7 @@ PRIMARY KEY (userID, questionID)
             }
         }
 
+        /*
         // A procedure that adds questions and answers into the database
         private void createQNA(SqlConnection connection, string question, string answer)
         {
@@ -287,6 +288,7 @@ WHERE counterType = 'AID';
                 command.ExecuteNonQuery();
             }
         }
+        */
 
         /*
         // A TEST TO FIND THE BEST METHOD TO STORE THE SALT
@@ -393,48 +395,49 @@ FROM tblTest;
         private void newLogin_lbl_Click(object sender, EventArgs e)
         {
             // Creates a new new user form
-            NewUser newForm = new NewUser();
-
-            // Hides the main menu form
-            this.Hide();
-
-            if (newForm.ShowDialog() == DialogResult.OK)
+            using (NewUser newForm = new NewUser())
             {
-                // Tries to create a connection to the database and otherwise catches the error and tells the user what the error is
-                try
+                // Hides the main menu form
+                this.Hide();
+
+                if (newForm.ShowDialog() == DialogResult.OK)
                 {
-                    // Declaring the connection
-                    using (SqlConnection connection = new SqlConnection())
+                    // Tries to create a connection to the database and otherwise catches the error and tells the user what the error is
+                    try
                     {
+                        // Declaring the connection
+                        using (SqlConnection connection = new SqlConnection())
+                        {
 
-                        // This allows us to connect to SQL Server
-                        connection.ConnectionString = Program.connectionString;
+                            // This allows us to connect to SQL Server
+                            connection.ConnectionString = Program.connectionString;
 
-                        // Opens the connection to the database
-                        connection.Open();
-
-
-
-                        // Calls the procedure initialiseQs()
-                        initialiseQs(connection, newForm.newUserID, 1, 16);
+                            // Opens the connection to the database
+                            connection.Open();
 
 
 
-                        // Closes the connection to the database
-                        connection.Close();
+                            // Calls the procedure initialiseEveryQUser()
+                            initialiseEveryQForUser(connection, newForm.newUserID);
+
+
+
+                            // Closes the connection to the database
+                            connection.Close();
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show("Error:\n\n" + ex);
                     }
                 }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("Error:\n\n" + ex);
-                }
+
+                // Releases all resources used by the new form
+                newForm.Dispose();
+
+                // Makes the login form visible again
+                this.Show();
             }
-
-            // Releases all resources used by the new form
-            newForm.Dispose();
-
-            // Makes the login form visible again
-            this.Show();
         }
 
         // Method that authenticates the user's login details
@@ -561,24 +564,104 @@ WHERE username = @username;
         // Adds the default questions and initialises them for each user
         private void addDefaultQs(SqlConnection connection)
         {
-            // Inserts default questions and answers into the database
-            createQNA(connection, "What particle is the only stable baryon?", "PROTON");
-            createQNA(connection, "What do you call a hadron that consists of 3 quarks?", "BARYON");
-            createQNA(connection, "What do you call a hadron that consists of a quark-antiquark pair?", "MESON");
-            createQNA(connection, "What baryon has a quark composition of udd?", "NEUTRON");
-            createQNA(connection, "What baryon has a quark composition of uud?", "PROTON");
-            createQNA(connection, "What is the antiparticle of an electron?", "POSITRON");
-            createQNA(connection, "What particles don't experience the strong force?", "LEPTONS");
-            createQNA(connection, "What do you call a wave where the oscillations travel perpendicular to the direction of propagation?", "TRANSVERSE");
-            createQNA(connection, "What do you call a wave where the oscillations travel parallel to the direction of propagation?", "LONGITUDINAL");
-            createQNA(connection, "What do you call two waves with the same wavelength?", "MONOCHROMATIC");
-            createQNA(connection, "What do you call two waves with the same wavelength and a fixed phase difference?", "COHERENT");
-            createQNA(connection, "What is the term used to describe the distance between two adjacent peaks on a wave?", "WAVELENGTH");
-            createQNA(connection, "What is the term used to describe the maximum displacement of the wave from its equilibrium position?", "AMPLITUDE");
-            createQNA(connection, "What do you call a point on a stationary wave where the displacement is 0?", "NODE");
-            createQNA(connection, "What do you call a point on a stationary wave with maximum displacement?", "ANTINODE");
-            createQNA(connection, "What is the term used to describe the spreading out of waves when they pass through or around a gap?", "DIFFRACTION");
+            // Instantiates a new object called createActivity
+            CreateActivity createActivity = new CreateActivity();
 
+            // FORMAT: createActivity.createQna(connection, "QUESTION", "ANSWER");
+            // TEMPLATE: createActivity.createQna(connection, "", "");
+
+            // Inserts default questions and answers into the database
+            createActivity.createQna(connection, "What particle is the only stable baryon?", "PROTON");
+            createActivity.createQna(connection, "What do you call a hadron that consists of 3 quarks?", "BARYON");
+            createActivity.createQna(connection, "What do you call a hadron that consists of a quark-antiquark pair?", "MESON");
+            createActivity.createQna(connection, "What baryon has a quark composition of udd?", "NEUTRON");
+            createActivity.createQna(connection, "What baryon has a quark composition of uud?", "PROTON");
+            createActivity.createQna(connection, "What is the antiparticle of an electron?", "POSITRON");
+            createActivity.createQna(connection, "What particles don't experience the strong force?", "LEPTONS");
+            createActivity.createQna(connection, "What do you call a wave where the oscillations travel perpendicular to the direction of propagation?", "TRANSVERSE");
+            createActivity.createQna(connection, "What do you call a wave where the oscillations travel parallel to the direction of propagation?", "LONGITUDINAL");
+            createActivity.createQna(connection, "What do you call two waves with the same wavelength?", "MONOCHROMATIC");
+            createActivity.createQna(connection, "What do you call two waves with the same wavelength and a fixed phase difference?", "COHERENT");
+            createActivity.createQna(connection, "What is the term used to describe the distance between two adjacent peaks on a wave?", "WAVELENGTH");
+            createActivity.createQna(connection, "What is the term used to describe the maximum displacement of the wave from its equilibrium position?", "AMPLITUDE");
+            createActivity.createQna(connection, "What do you call a point on a stationary wave where the displacement is 0?", "NODE");
+            createActivity.createQna(connection, "What do you call a point on a stationary wave with maximum displacement?", "ANTINODE");
+            createActivity.createQna(connection, "What is the term used to describe the spreading out of waves when they pass through or around a gap?", "DIFFRACTION");
+
+            // FORMAT: createActivity.createTimedMC(connection, "QUESTION", "CORRECT ANSWER", "WRONG ANSWER", "WRONG ANSWER", "WRONG ANSWER");
+            // TEMPLATE: createActivity.createTimedMC(connection, "", "", "", "", "");
+
+            // Inserts default multiple choice questions and answers into the database
+            createActivity.createTimedMC(connection, "An atom of Nitrogen (nucleon number = 16, proton number = 7) gains 3 electrons.\n\nWhat is the specific charge of the ion?",
+                "−1.80 × 10^7 Ckg^–1",
+                "1.80 × 10^7 Ckg^–1", "4.19 × 10^7 Ckg^–1", "-4.19 × 10^7 Ckg^–1");
+            createActivity.createTimedMC(connection, "Electrons moving in a beam have the same de Broglie wavelength as protons in a separate beam moving at a speed of 2.8 × 104 ms^–1.\n\nWhat is the speed of the electrons?",
+                "5.1 × 10^7 ms^−1",
+                "1.5 × 10^1 ms^−1", "2.8 × 10^4 ms^−1", "1.2 × 10^6 ms^−1");
+            createActivity.createTimedMC(connection, "Which statement is not correct for ultrasound and X-rays?",
+                "Both can be polarised",
+                "Both can be refracted", "Both can be diffracted", "Both can be reflected");
+            createActivity.createTimedMC(connection, "When a monochromatic light source is incident on two slits of the same width an interference pattern is produced.\n\nOne slit is then covered with opaque black paper.\n\nWhat is the effect of covering one slit on the resulting interference pattern?",
+                "Fewer maxima are observed",
+                "The intensity of the central maximum will increase", "The width of the central maximum decreases", "The outer maxima become wider");
+            createActivity.createTimedMC(connection, "When light of wavelength 5.0 × 10^−7 m is incident normally on a diffraction grating the fourth-order maximum is observed at an angle of 30°.\n\nWhat is the number of lines per mm on the diffraction grating?",
+                "2.5 × 10^2",
+                "2.5 × 10^5", "1.0 × 10^3", "1.0 × 10^6");
+            createActivity.createTimedMC(connection, "A rocket of mass 12 000 kg accelerates vertically upwards from the surface of the Earth at 1.4 ms^−2.\n\nWhat is the thrust of the rocket?",
+                "1.3 × 10^5 N",
+                "1.7 × 10^4 N", "1.0 × 10^5 N", "1.6 × 10^5 N");
+            createActivity.createTimedMC(connection, "A car of mass 580 kg collides with the rear of a stationary van of mass 1200 kg.\n\nFollowing the collision, the van moves with a velocity of 6.20 ms^−1 and the car recoils in the opposite direction with a velocity of 1.60 ms^−1.\n\nWhat is the initial speed of the car?",
+                "11.2 ms^−1",
+                "5.43 ms^−1", "12.8 ms^−1", "14.4 ms^−1");
+            createActivity.createTimedMC(connection, "A sample of wire has a Young modulus E.  A second sample of wire made from an identical material has three times the length and half the diameter of the first sample.\n\nWhat is the Young modulus of the second sample of wire in terms of E?",
+                "E",
+                "0.25E", "6E", "12E");
+            createActivity.createTimedMC(connection, "The combined resistance of n identical resistors connected in parallel is Rn.\n\nWhich statement correctly describes the variation of Rn as n increases?",
+                "Rn decreases non-linearly as n increases",
+                "Rn decreases linearly as n increases", "Rn increases linearly as n increases", "Rn increases non-linearly as n increases");
+
+            // FORMAT: createActivity.createWordedQ(connection, "QUESTION", "MODEL ANSWER", LIST OF KEYWORDS);
+            // TEMPLATE: createActivity.createWordedQ(connection, "", "", keyWords);
+
+            // Inserts default questions that require worded answers, model answers and keywords into the database
+            List<string> keyWords = new List<string>();
+
+            keyWords.Clear();
+            keyWords.Add("weak");
+            keyWords.Add("lepton");
+            keyWords.Add("hadron");
+            createActivity.createWordedQ(connection, "Explain which fundamental interaction is responsible for the decay:\nPotassium + Electron -> Argon + Electron Neutrino",
+                "The weak interaction is responsible for this decay since both hadrons and leptons are involved.",
+                keyWords);
+            keyWords.Clear();
+
+            keyWords.Clear();
+            keyWords.Add("beta");
+            keyWords.Add("electron");
+            keyWords.Add("antielectron neutrino");
+            createActivity.createWordedQ(connection, "The potassium isotope can decay by a decay process to form a calcium-40 nuclide\n\nSuggest how the emissions from a nucleus of decaying potassium can be used to confirm which decay process is occurring.",
+                "This decay is beta minus emission since an electron and an antielectron neutrino are released while no photons are released. The electron will be detected through the use of a cloud chamber or by electron absorption.",
+                keyWords);
+            keyWords.Clear();
+
+            // FORMAT: createActivity.createMathQ(connection, "QUESTION", "EQUATION", "RANGES", "D.P.");
+            // TEMPLATE: createActivity.createMathQ(connection, "", "", "", "");
+
+            // Inserts default math questions, the equation used to calculate the answer, the ranges of values that could appear and the decimal places the values are in into the database
+            createActivity.createMathQ(connection, "One decay mechanism for the decay of Potassium (nucleon number = 40, proton number = 19) results in the argon nucleus having an excess energy of {0} MeV.  It loses this energy by emitting a single gamma photon.\n\nCalculate the wavelength of the photon released by the argon nucleus in metres.",
+                "6.63E-34 3E+8 * {0} 1.6E-13 * /",
+                "1:3",
+                "2");
+            createActivity.createMathQ(connection, "A ray of monochromatic green light is incident normally on the curved surface of a semicircular glass block.\n\nThe angle of refraction of the ray at the plane surface is {0}° and the refractive index of the glass used = {1}\n\nCalculate the angle of incidence of the ray on the flat surface of the block in degrees.",
+                "1 {0} SIN * {1} / ARCSIN",
+                "0:90;1.5:1.6",
+                "2");
+            createActivity.createMathQ(connection, "Solar cells convert solar energy to useful electrical energy in the road sign with an efficiency of {0}%. The solar-cell supply used by the engineer has a total surface area of {1} cm^2.\n\nCalculate the minimum intensity, in Wm^–2, of the sunlight needed to provide the minimum current of {2} mA to the road sign when it has a resistance of {3} Ω.",
+                "{2} 10 -3 ^ * 2 ^ {3} * {0} / {1} 10 -4 ^ * /",
+                "1:100;10:50;50:100;1:10",
+                "1");
+
+            /*
             // Opens a new connection if there isn't already a connection open (this just makes sure an error relating to no connection being open won't occur)
             if (connection.State != ConnectionState.Open) connection.Open();
 
@@ -621,10 +704,11 @@ FROM tblUsers;
                     }
                 }
             }
+            */
         }
-
-        // Initialises the questions within the range given in as parameters for the user given in the parameter
-        private void initialiseQs(SqlConnection connection, string aUserID, int minQ, int maxQ)
+        
+        // Initialises every question for the user in the parameter
+        private void initialiseEveryQForUser(SqlConnection connection, string aUserID)
         {
             // Opens a new connection if there isn't already a connection open (this just makes sure an error relating to no connection being open won't occur)
             if (connection.State != ConnectionState.Open) connection.Open();
@@ -635,18 +719,13 @@ FROM tblUsers;
                 // Initialises the connection
                 command.Connection = connection;
 
-                // A SQL query that initialises the questions
+                // A SQL query that initialises every question for the user in the parameter
                 command.CommandText = @"
-WHILE @min <= @max
-BEGIN
-    INSERT INTO tblUserAnswers (userID, questionID, numberOfAttempts, numberOfCorrectAttempts)
-    VALUES (@userID, @min, 0, 0);
-    SELECT @min = @min + 1;
-END
+INSERT INTO tblUserAnswers
+SELECT @userID, questionID, 0, 0, NULL, NULL, NULL, NULL
+FROM tblQuestions;
 ";
                 command.Parameters.AddWithValue("@userID", aUserID);
-                command.Parameters.AddWithValue("@min", minQ);
-                command.Parameters.AddWithValue("@max", maxQ);
 
                 // Runs the SQL code
                 command.ExecuteNonQuery();

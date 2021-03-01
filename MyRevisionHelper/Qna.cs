@@ -44,63 +44,57 @@ namespace MyRevisionHelper
             numOfQAnsCorr = 0;
 
             // Creates a new NumOfQ form
-            NumOfQ newForm = new NumOfQ();
-
-            // Hides the Qna form
-            this.Hide();
-
-            // Displays the new NumOfQ form and if the NumOfQ form is closed without confirming the number of questions they want to answer, the user is redirected back to the main menu form
-            if (newForm.ShowDialog() == DialogResult.OK)
+            using (NumOfQ newForm = new NumOfQ())
             {
-                // Initialises the integer variable numOfQVal to the number of questions that are to appear
-                numOfQVal = newForm.numOfQVal;
+                // Hides the Qna form
+                this.Hide();
 
-                // Releases all resources used by the new form
-                newForm.Dispose();
-
-                // Tries to create a connection to the database and otherwise catches the error and tells the user what the error is
-                try
+                // Displays the new NumOfQ form and if the NumOfQ form is closed without confirming the number of questions they want to answer, the user is redirected back to the main menu form
+                if (newForm.ShowDialog() == DialogResult.OK)
                 {
-                    // Declaring the connection
-                    using (SqlConnection connection = new SqlConnection())
+                    // Initialises the integer variable numOfQVal to the number of questions that are to appear
+                    numOfQVal = newForm.numOfQVal;
+
+                    // Releases all resources used by the new form
+                    newForm.Dispose();
+
+                    // Tries to create a connection to the database and otherwise catches the error and tells the user what the error is
+                    try
                     {
-
-                        // This allows us to connect to SQL Server
-                        connection.ConnectionString = Program.connectionString;
-
-                        // Opens the connection to the database
-                        connection.Open();
-
-
-
-                        // Creates a new object called command that can allow SQL code to be run
-                        using (SqlCommand command = new SqlCommand())
+                        // Declaring the connection
+                        using (SqlConnection connection = new SqlConnection())
                         {
-                            // Initialises the connection
-                            command.Connection = connection;
+
+                            // This allows us to connect to SQL Server
+                            connection.ConnectionString = Program.connectionString;
+
+                            // Opens the connection to the database
+                            connection.Open();
+
+
 
                             // Randomly selects a question from the database and stores it in the object
-                            activity.weight(connection, "QNA");
+                            activity.weight(connection);
 
                             // Extracts the question from the object and displays it on the question_lbl
                             question_lbl.Text = activity.getQuestion();
+
+
+
+                            // Closes the connection to the database
+                            connection.Close();
                         }
-
-
-
-                        // Closes the connection to the database
-                        connection.Close();
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show("Error:\n\n" + ex);
                     }
                 }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("Error:\n\n" + ex);
-                }
+                else this.Close();
             }
-            else this.Close();
         }
 
-        // Method that closes the NumOfQ form and displays the main menu form to the user
+        // Method that closes the Qna form and displays the main menu form to the user
         private void homeIcon_Click(object sender, EventArgs e)
         {
             this.Close();
@@ -122,52 +116,45 @@ namespace MyRevisionHelper
                     // Opens the connection to the database
                     connection.Open();
 
-
-
-                    // Creates a new object called command that can allow SQL code to be run
-                    using (SqlCommand command = new SqlCommand())
+                    
+                    
+                    if (answer_textbox.Text != "")
                     {
-                        // Initialises the connection
-                        command.Connection = connection;
+                        // Increments the field numberOfAttempts in the database
+                        if (!Program.guest) activity.incAttempts(connection);
 
-                        if (answer_textbox.Text != "")
+                        // Checks the user's answer against the one in the database
+                        if (answer_textbox.Text.ToUpper() == activity.getAnswer())
                         {
-                            // Increments the field numberOfAttempts in the database
-                            activity.incAttempts(connection);
+                            // Increments the field numberOfCorrectAttempts in the database
+                            if (!Program.guest) activity.incCorrectAttempts(connection);
 
-                            // Checks the user's answer against the one in the database
-                            if (answer_textbox.Text.ToUpper() == activity.getAnswer())
-                            {
-                                // Increments the field numberOfCorrectAttempts in the database
-                                activity.incCorrectAttempts(connection);
+                            // Increments the integer variable numOfQAnsCorr
+                            numOfQAnsCorr++;
 
-                                // Increments the integer variable numOfQAnsCorr
-                                numOfQAnsCorr++;
+                            // Tells the user they answered correctly
+                            MessageBox.Show("Correct");
 
-                                // Tells the user they answered correctly
-                                MessageBox.Show("Correct");
+                            // Makes the next button visible
+                            next_btn.Show();
 
-                                // Makes the next button visible
-                                next_btn.Show();
-
-                                // Makes sure both the skip button and check button are hidden
-                                if (skip_btn.Visible == true) skip_btn.Hide();
-                                check_btn.Hide();
-                            }
-                            else
-                            {
-                                // Tells the user they answered incorrectly
-                                MessageBox.Show("Incorrect, please try again");
-
-                                // Makes the skip button visible after the user answers the question incorrectly and the skip button is not visible
-                                if (skip_btn.Visible == false) skip_btn.Show();
-                            }
+                            // Makes sure both the skip button and check button are hidden
+                            if (skip_btn.Visible == true) skip_btn.Hide();
+                            check_btn.Hide();
                         }
                         else
                         {
-                            // Tells the user to enter an answer
-                            MessageBox.Show("Please enter an answer");
+                            // Tells the user they answered incorrectly
+                            MessageBox.Show("Incorrect, please try again");
+
+                            // Makes the skip button visible after the user answers the question incorrectly and the skip button is not visible
+                            if (skip_btn.Visible == false) skip_btn.Show();
                         }
+                    }
+                    else
+                    {
+                        // Tells the user to enter an answer
+                        MessageBox.Show("Please enter an answer");
                     }
 
 
@@ -210,19 +197,12 @@ namespace MyRevisionHelper
                         connection.Open();
 
 
+                        
+                        // Randomly selects a question from the database and stores it in the object
+                        activity.weight(connection);
 
-                        // Creates a new object called command that can allow SQL code to be run
-                        using (SqlCommand command = new SqlCommand())
-                        {
-                            // Initialises the connection
-                            command.Connection = connection;
-
-                            // Randomly selects a question from the database and stores it in the object
-                            activity.weight(connection, "QNA");
-
-                            // Extracts the question from the object and displays it on the question_lbl
-                            question_lbl.Text = activity.getQuestion();
-                        }
+                        // Extracts the question from the object and displays it on the question_lbl
+                        question_lbl.Text = activity.getQuestion();
 
 
 
@@ -249,6 +229,7 @@ namespace MyRevisionHelper
         // Method that skips the question
         private void skip_btn_Click(object sender, EventArgs e)
         {
+            // Displays a message box with the correct answer
             MessageBox.Show(string.Format("The correct answer was:\n{0}", activity.getAnswer()));
 
             if (nextQNo <= numOfQVal)
@@ -276,19 +257,12 @@ namespace MyRevisionHelper
                         connection.Open();
 
 
+                        
+                        // Randomly selects a question from the database and stores it in the object
+                        activity.weight(connection);
 
-                        // Creates a new object called command that can allow SQL code to be run
-                        using (SqlCommand command = new SqlCommand())
-                        {
-                            // Initialises the connection
-                            command.Connection = connection;
-
-                            // Randomly selects a question from the database and stores it in the object
-                            activity.weight(connection, "QNA");
-
-                            // Extracts the question from the object and displays it on the question_lbl
-                            question_lbl.Text = activity.getQuestion();
-                        }
+                        // Extracts the question from the object and displays it on the question_lbl
+                        question_lbl.Text = activity.getQuestion();
 
 
 

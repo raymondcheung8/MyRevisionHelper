@@ -71,7 +71,7 @@ userID          CHAR(36)    NOT NULL    REFERENCES  tblUsers (userID)
             }
         }
 
-        // Method that closes the login form and displays the main menu form to the user
+        // Method that closes the notes form and displays the main menu form to the user
         private void homeIcon_Click(object sender, EventArgs e)
         {
             this.Close();
@@ -80,19 +80,31 @@ userID          CHAR(36)    NOT NULL    REFERENCES  tblUsers (userID)
         // Method that redirects the user to a form where they can add notes
         private void addNote_btn_Click(object sender, EventArgs e)
         {
-            AddNote newForm = new AddNote();
-            this.Hide();
-            newForm.ShowDialog();
-            this.Show();
+            // Code for showing the newform
+            using (AddNote newForm = new AddNote())
+            {
+                this.Hide();
+                newForm.ShowDialog();
+                this.Show();
+
+                // Releases all resources used by the new form
+                newForm.Dispose();
+            }
         }
 
         // Method that redirects the user to a form where they can check notes
         private void checkNotes_btn_Click(object sender, EventArgs e)
         {
-            CheckNotes newForm = new CheckNotes();
-            this.Hide();
-            newForm.ShowDialog();
-            this.Show();
+            // Code for showing the newform
+            using (CheckNotes newForm = new CheckNotes())
+            {
+                this.Hide();
+                newForm.ShowDialog();
+                this.Show();
+
+                // Releases all resources used by the new form
+                newForm.Dispose();
+            }
         }
 
         // Function that returns whether a certain table exists

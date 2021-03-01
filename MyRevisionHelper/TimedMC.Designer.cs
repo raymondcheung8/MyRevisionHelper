@@ -28,11 +28,157 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(TimedMC));
+            this.homeIcon = new System.Windows.Forms.PictureBox();
+            this.question_lbl = new System.Windows.Forms.Label();
+            this.answer1_checkBox = new System.Windows.Forms.CheckBox();
+            this.answer2_checkBox = new System.Windows.Forms.CheckBox();
+            this.answer3_checkBox = new System.Windows.Forms.CheckBox();
+            this.answer4_checkBox = new System.Windows.Forms.CheckBox();
+            this.check_btn = new System.Windows.Forms.Button();
+            this.next_btn = new System.Windows.Forms.Button();
+            this.skip_btn = new System.Windows.Forms.Button();
+            this.timerDisplay_lbl = new System.Windows.Forms.Label();
+            ((System.ComponentModel.ISupportInitialize)(this.homeIcon)).BeginInit();
+            this.SuspendLayout();
+            // 
+            // homeIcon
+            // 
+            this.homeIcon.Image = ((System.Drawing.Image)(resources.GetObject("homeIcon.Image")));
+            this.homeIcon.Location = new System.Drawing.Point(5, 5);
+            this.homeIcon.Name = "homeIcon";
+            this.homeIcon.Size = new System.Drawing.Size(16, 16);
+            this.homeIcon.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.homeIcon.TabIndex = 10;
+            this.homeIcon.TabStop = false;
+            this.homeIcon.Click += new System.EventHandler(this.homeIcon_Click);
+            // 
+            // question_lbl
+            // 
+            this.question_lbl.Location = new System.Drawing.Point(27, 18);
+            this.question_lbl.Name = "question_lbl";
+            this.question_lbl.Size = new System.Drawing.Size(300, 104);
+            this.question_lbl.TabIndex = 11;
+            this.question_lbl.Text = "label1";
+            // 
+            // answer1_checkBox
+            // 
+            this.answer1_checkBox.AutoSize = true;
+            this.answer1_checkBox.Location = new System.Drawing.Point(30, 125);
+            this.answer1_checkBox.Name = "answer1_checkBox";
+            this.answer1_checkBox.Size = new System.Drawing.Size(80, 17);
+            this.answer1_checkBox.TabIndex = 12;
+            this.answer1_checkBox.Text = "checkBox1";
+            this.answer1_checkBox.UseVisualStyleBackColor = true;
+            this.answer1_checkBox.CheckedChanged += new System.EventHandler(this.answer1_checkBox_CheckedChanged);
+            // 
+            // answer2_checkBox
+            // 
+            this.answer2_checkBox.AutoSize = true;
+            this.answer2_checkBox.Location = new System.Drawing.Point(30, 148);
+            this.answer2_checkBox.Name = "answer2_checkBox";
+            this.answer2_checkBox.Size = new System.Drawing.Size(80, 17);
+            this.answer2_checkBox.TabIndex = 13;
+            this.answer2_checkBox.Text = "checkBox2";
+            this.answer2_checkBox.UseVisualStyleBackColor = true;
+            this.answer2_checkBox.CheckedChanged += new System.EventHandler(this.answer2_checkBox_CheckedChanged);
+            // 
+            // answer3_checkBox
+            // 
+            this.answer3_checkBox.AutoSize = true;
+            this.answer3_checkBox.Location = new System.Drawing.Point(30, 171);
+            this.answer3_checkBox.Name = "answer3_checkBox";
+            this.answer3_checkBox.Size = new System.Drawing.Size(80, 17);
+            this.answer3_checkBox.TabIndex = 14;
+            this.answer3_checkBox.Text = "checkBox3";
+            this.answer3_checkBox.UseVisualStyleBackColor = true;
+            this.answer3_checkBox.CheckedChanged += new System.EventHandler(this.answer3_checkBox_CheckedChanged);
+            // 
+            // answer4_checkBox
+            // 
+            this.answer4_checkBox.AutoSize = true;
+            this.answer4_checkBox.Location = new System.Drawing.Point(30, 194);
+            this.answer4_checkBox.Name = "answer4_checkBox";
+            this.answer4_checkBox.Size = new System.Drawing.Size(80, 17);
+            this.answer4_checkBox.TabIndex = 15;
+            this.answer4_checkBox.Text = "checkBox4";
+            this.answer4_checkBox.UseVisualStyleBackColor = true;
+            this.answer4_checkBox.CheckedChanged += new System.EventHandler(this.answer4_checkBox_CheckedChanged);
+            // 
+            // check_btn
+            // 
+            this.check_btn.Location = new System.Drawing.Point(114, 217);
+            this.check_btn.Name = "check_btn";
+            this.check_btn.Size = new System.Drawing.Size(127, 23);
+            this.check_btn.TabIndex = 16;
+            this.check_btn.Text = "Check answer";
+            this.check_btn.UseVisualStyleBackColor = true;
+            this.check_btn.Click += new System.EventHandler(this.check_btn_Click);
+            // 
+            // next_btn
+            // 
+            this.next_btn.Location = new System.Drawing.Point(247, 217);
+            this.next_btn.Name = "next_btn";
+            this.next_btn.Size = new System.Drawing.Size(80, 23);
+            this.next_btn.TabIndex = 17;
+            this.next_btn.Text = "Next question";
+            this.next_btn.UseVisualStyleBackColor = true;
+            this.next_btn.Click += new System.EventHandler(this.next_btn_Click);
+            // 
+            // skip_btn
+            // 
+            this.skip_btn.Location = new System.Drawing.Point(29, 217);
+            this.skip_btn.Name = "skip_btn";
+            this.skip_btn.Size = new System.Drawing.Size(79, 23);
+            this.skip_btn.TabIndex = 18;
+            this.skip_btn.Text = "Skip question";
+            this.skip_btn.UseVisualStyleBackColor = true;
+            this.skip_btn.Click += new System.EventHandler(this.skip_btn_Click);
+            // 
+            // timerDisplay_lbl
+            // 
+            this.timerDisplay_lbl.AutoSize = true;
+            this.timerDisplay_lbl.Location = new System.Drawing.Point(27, 5);
+            this.timerDisplay_lbl.Name = "timerDisplay_lbl";
+            this.timerDisplay_lbl.Size = new System.Drawing.Size(35, 13);
+            this.timerDisplay_lbl.TabIndex = 19;
+            this.timerDisplay_lbl.Text = "label1";
+            // 
+            // TimedMC
+            // 
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.ClientSize = new System.Drawing.Size(339, 251);
+            this.Controls.Add(this.timerDisplay_lbl);
+            this.Controls.Add(this.skip_btn);
+            this.Controls.Add(this.next_btn);
+            this.Controls.Add(this.check_btn);
+            this.Controls.Add(this.answer4_checkBox);
+            this.Controls.Add(this.answer3_checkBox);
+            this.Controls.Add(this.answer2_checkBox);
+            this.Controls.Add(this.answer1_checkBox);
+            this.Controls.Add(this.question_lbl);
+            this.Controls.Add(this.homeIcon);
+            this.Name = "TimedMC";
             this.Text = "TimedMC";
+            this.Load += new System.EventHandler(this.TimedMC_Load);
+            ((System.ComponentModel.ISupportInitialize)(this.homeIcon)).EndInit();
+            this.ResumeLayout(false);
+            this.PerformLayout();
+
         }
 
         #endregion
+
+        private System.Windows.Forms.PictureBox homeIcon;
+        private System.Windows.Forms.Label question_lbl;
+        private System.Windows.Forms.CheckBox answer1_checkBox;
+        private System.Windows.Forms.CheckBox answer2_checkBox;
+        private System.Windows.Forms.CheckBox answer3_checkBox;
+        private System.Windows.Forms.CheckBox answer4_checkBox;
+        private System.Windows.Forms.Button check_btn;
+        private System.Windows.Forms.Button next_btn;
+        private System.Windows.Forms.Button skip_btn;
+        private System.Windows.Forms.Label timerDisplay_lbl;
     }
 }

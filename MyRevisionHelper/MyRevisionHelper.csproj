@@ -112,6 +112,12 @@
     <Compile Include="Qna.Designer.cs">
       <DependentUpon>Qna.cs</DependentUpon>
     </Compile>
+    <Compile Include="TimeAllocated.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="TimeAllocated.Designer.cs">
+      <DependentUpon>TimeAllocated.cs</DependentUpon>
+    </Compile>
     <Compile Include="TimedMC.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -162,6 +168,15 @@
     </Compile>
     <EmbeddedResource Include="Qna.resx">
       <DependentUpon>Qna.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="TimeAllocated.resx">
+      <DependentUpon>TimeAllocated.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="TimedMC.resx">
+      <DependentUpon>TimedMC.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WordedQ.resx">
+      <DependentUpon>WordedQ.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

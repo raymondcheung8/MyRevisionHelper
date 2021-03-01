@@ -13,7 +13,7 @@ namespace MyRevisionHelper
     public partial class Break : Form
     {
         // A new timer to countdown the time left until the break ends is created
-        public Timer breakTimer = new Timer();
+        private Timer breakTimer = new Timer();
 
         public Break()
         {
@@ -25,34 +25,51 @@ namespace MyRevisionHelper
         {
             // This allows the timer to tick
             breakTimer.Tick += new EventHandler(breakTimer_Tick);
+
             // This sets the interval of the timer to 1s
             breakTimer.Interval = 1000;
+
+            // Only allows values within a certain range to be stored in hrs.Value
+            hrs.Minimum = 0;
+            hrs.Maximum = 23;
+
+            // Only allows values within a certain range to be stored in mins.Value
+            mins.Minimum = 0;
+            mins.Maximum = 59;
+
+            // Only allows values within a certain range to be stored in secs.Value
+            secs.Minimum = 0;
+            secs.Maximum = 59;
         }
 
         // Method to only allow values within a certain range to be stored in hrs.Value
         private void hrs_ValueChanged(object sender, EventArgs e)
         {
-            if (hrs.Value < 0) hrs.Value = 0;
-            if (hrs.Value >= 24) hrs.Value = 23;
+            if (hrs.Value < hrs.Minimum) hrs.Value = hrs.Minimum;
+            if (hrs.Value > hrs.Maximum) hrs.Value = hrs.Maximum;
         }
 
         // Method to only allow values within a certain range to be stored in mins.Value
         private void mins_ValueChanged(object sender, EventArgs e)
         {
-            if (mins.Value < 0) mins.Value = 0;
-            if (mins.Value >= 60) mins.Value = 59;
+            if (mins.Value < mins.Minimum) mins.Value = mins.Minimum;
+            if (mins.Value > mins.Maximum) mins.Value = mins.Maximum;
         }
 
         // Method to only allow values within a certain range to be stored in secs.Value
         private void secs_ValueChanged(object sender, EventArgs e)
         {
-            if (secs.Value < 0) secs.Value = 0;
-            if (secs.Value >= 60) secs.Value = 59;
+            if (secs.Value < secs.Minimum) secs.Value = secs.Minimum;
+            if (secs.Value > secs.Maximum) secs.Value = secs.Maximum;
         }
 
         // Method that closes the break form and displays the main menu form to the user
         private void homeIcon_Click(object sender, EventArgs e)
         {
+            // Stops the timer
+            breakTimer.Stop();
+
+            // Closes the form
             this.Close();
         }
 
