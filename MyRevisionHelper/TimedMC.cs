@@ -330,9 +330,6 @@ namespace MyRevisionHelper
         // Method that checks the user's answer
         private void check_btn_Click(object sender, EventArgs e)
         {
-            // Stops the timer
-            timer.Stop();
-
             // Tries to create a connection to the database and otherwise catches the error and tells the user what the error is
             try
             {
@@ -361,33 +358,44 @@ namespace MyRevisionHelper
                     // Sets the integer variable userAnswer to -1 if no checkboxes are checked
                     else userAnswer = -1;
 
-                    // Increments the field numberOfAttempts in the database
-                    if (!Program.guest) activity.incAttempts(connection);
-
-                    if (userAnswer == corrAns)
+                    // Only validates the user's answer if the user has given one
+                    if (userAnswer != -1)
                     {
-                        // Increments the field numberOfCorrectAttempts in the database
-                        if (!Program.guest) activity.incCorrectAttempts(connection);
+                        // Stops the timer
+                        timer.Stop();
 
-                        // Increments the integer variable numOfQAnsCorr
-                        numOfQAnsCorr++;
+                        // Increments the field numberOfAttempts in the database
+                        if (!Program.guest) activity.incAttempts(connection);
 
-                        // Tells the user they answered correctly
-                        MessageBox.Show("Correct");
+                        if (userAnswer == corrAns)
+                        {
+                            // Increments the field numberOfCorrectAttempts in the database
+                            if (!Program.guest) activity.incCorrectAttempts(connection);
+
+                            // Increments the integer variable numOfQAnsCorr
+                            numOfQAnsCorr++;
+
+                            // Tells the user they answered correctly
+                            MessageBox.Show("Correct");
+                        }
+                        else
+                        {
+                            // Displays a message box with the correct answer
+                            MessageBox.Show(string.Format("The correct answer was:\n{0}", activity.getAnswer()));
+                        }
+
+                        // Makes the next button visible
+                        next_btn.Show();
+
+                        // Makes sure both the skip button and check button are hidden
+                        if (skip_btn.Visible == true) skip_btn.Hide();
+                        check_btn.Hide();
                     }
                     else
                     {
-                        // Displays a message box with the correct answer
-                        MessageBox.Show(string.Format("The correct answer was:\n{0}", activity.getAnswer()));
+                        // Tells the user to enter an answer
+                        MessageBox.Show("Please enter an answer");
                     }
-
-                    // Makes the next button visible
-                    next_btn.Show();
-
-                    // Makes sure both the skip button and check button are hidden
-                    if (skip_btn.Visible == true) skip_btn.Hide();
-                    check_btn.Hide();
-
 
 
                     // Closes the connection to the database

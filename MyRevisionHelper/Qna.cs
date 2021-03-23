@@ -118,6 +118,7 @@ namespace MyRevisionHelper
 
                     
                     
+                    // Makes sure the user doesn't leave the answer textbox blank
                     if (answer_textbox.Text != "")
                     {
                         // Increments the field numberOfAttempts in the database

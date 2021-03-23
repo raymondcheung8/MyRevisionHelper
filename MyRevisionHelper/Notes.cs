@@ -21,54 +21,7 @@ namespace MyRevisionHelper
         // Main method
         private void Notes_Load(object sender, EventArgs e)
         {
-            // Tries to create a connection to the database and otherwise catches the error and tells the user what the error is
-            try
-            {
-                // Declaring the connection
-                using (SqlConnection connection = new SqlConnection())
-                {
 
-                    // This allows us to connect to SQL Server
-                    connection.ConnectionString = Program.connectionString;
-
-                    // Opens the connection to the database
-                    connection.Open();
-
-
-
-                    // Creates a new object called command that can allow SQL code to be run
-                    using (SqlCommand command = new SqlCommand())
-                    {
-                        command.Connection = connection;
-
-                        // Calls upon the getTableExists() function and will create a new table called tblNotes if there isn't already an existing one
-                        if (!getTableExists(connection, "tblNotes"))
-                        {
-                            // A SQL query that creates a new table called "tblNotes" where "noteID" is the primary key
-                            command.CommandText = @"
-CREATE TABLE tblNotes
-(
-noteID          CHAR(36)    NOT NULL    PRIMARY KEY,
-insertDate      DATETIME    NOT NULL,
-noteDescr       TEXT        NOT NULL,
-userID          CHAR(36)    NOT NULL    REFERENCES  tblUsers (userID)
-);
-";
-                            // Runs the SQL code
-                            command.ExecuteNonQuery();
-                        }
-                    }
-
-
-
-                    // Closes the connection to the database
-                    connection.Close();
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Error:\n\n" + ex);
-            }
         }
 
         // Method that closes the notes form and displays the main menu form to the user
@@ -105,12 +58,6 @@ userID          CHAR(36)    NOT NULL    REFERENCES  tblUsers (userID)
                 // Releases all resources used by the new form
                 newForm.Dispose();
             }
-        }
-
-        // Function that returns whether a certain table exists
-        private bool getTableExists(SqlConnection connection, string tableName)
-        {
-            return Program.getTableExists(connection, tableName);
         }
     }
 }

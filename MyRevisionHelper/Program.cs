@@ -12,70 +12,13 @@ namespace MyRevisionHelper
     static class Program
     {
         // Creates and sets the values for a new global string that contains the connection string
-        public static string connectionString = string.Format(@"Server=DELL4310\SQLEXPRESS;Database=MyRevisionHelper;Trusted_Connection=True;");
+        public static string connectionString = @"Server=DELL4310\SQLEXPRESS;Database=MyRevisionHelper;Trusted_Connection=True;";
 
         // Creates a new global string that contains the userID and initialises this string to ""
         public static string userID = "";
 
         // Creates a new global boolean that tells the software whether the user is a guest and initialises it to false
         public static bool guest = false;
-
-        // Function that returns whether a certain table exists
-        public static bool getTableExists(SqlConnection connection, string tableName)
-        {
-            // Declares a new datatable that will contain all of the tables
-            DataTable tableSchema;
-
-            // Declares a new datatable that will contain the table that is being searched for
-            DataRow[] myTable;
-
-            // Opens a new connection if there isn't already a connection open (this just makes sure an error relating to no connection being open won't occur)
-            if (connection.State != ConnectionState.Open) connection.Open();
-
-            // Copies all the tables on the database to a local datatable
-            tableSchema = connection.GetSchema("TABLES");
-
-            // Copies all the tables that have the same name as the table we are searching for to a datarow array
-            myTable = tableSchema.Select(string.Format("TABLE_NAME='{0}'", tableName));
-
-            // Returns false if the datarow is empty and otherwise returns true
-            if (myTable.Length == 0)
-            {
-                // Test to see if it will show the correct message when table doesn't exist
-                //MessageBox.Show("TABLE DOESN'T EXIST");
-
-                return false;
-            }
-            else
-            {
-                // Test to see if it will show the correct message when table doesn't exist
-                //MessageBox.Show("TABLE EXISTS");
-
-                return true;
-            }
-
-            // THE BELOW CODE DOESN'T WORK AS IT THROWS A PERMISSION ERROR FOR THE TABLE 'MSysObjects'
-            /*
-            // A SQL query that finds if a certain table already exists
-            // Type 1, Type 4, Type 6 in MSysObjects are the user created tables
-            // type 1 = Table - Local Access Tables
-            // type 4 = Table - Linked ODBC Tables
-            // type 6 = Table - Linked Access Tables
-            command.CommandText = string.Format(@"
-SELECT MSysObjects.Name
-FROM MSysObjects
-WHERE
-MSysObjects.type In (1,4,6)
-AND MSysObjects.Name = '{0}'
-", tableName);
-
-            // Runs the SQL code and stores the result in reader
-            SqlDataReader reader = command.ExecuteReader();
-
-            // Returns the boolean value of whether or not reader has rows
-            return reader.HasRows;
-             */
-        }
 
         /// <summary>
         /// The main entry point for the application.
@@ -86,6 +29,191 @@ AND MSysObjects.Name = '{0}'
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new MainMenu());
+        }
+    }
+
+    public static class MathQMethods
+    {
+        // A function that generates a list of values and returns it
+        public static List<string> getValues(Random rnd, string ranges, int dp)
+        {
+            // Instantiates a new string list called values
+            List<string> values = new List<string>();
+
+            // Ranges will be formatted like this: "10:20;60:70;35:45"
+
+            // Stores the ranges obtained from the SELECT statement in a new string array called rangesArray
+            string[] rangesArray = ranges.Split(';');
+
+            // Splits the ranges up into bounds for each range
+            foreach (string item in rangesArray)
+            {
+                // Splits the ranges up into bounds
+                string[] bounds = item.Split(':');
+
+                // Checks whether there are two bounds stored in the array, i.e. the lower and upper bound
+                if (bounds.Length == 2)
+                {
+                    // Declares and initialises the upper and lower bounds to 0
+                    float lBound = 0;
+                    float uBound = 0;
+
+                    // Tries to parse the bounds from string to float and otherwise returns an error
+                    if (float.TryParse(bounds[0], out lBound) && float.TryParse(bounds[1], out uBound))
+                    {
+                        // Generates a random value between the lower and upper bound to the number of decimal places stated and stores it in the string list values
+                        values.Add((
+                            (float)rnd.Next(
+                            (Int32)(lBound * Math.Pow(10, dp)),
+                            (Int32)(uBound * Math.Pow(10, dp) + 1))
+                            * Math.Pow(10, -dp)).ToString());
+                    }
+                    else
+                    {
+                        MessageBox.Show("ERROR with parsing bounds");
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("ERROR with bounds notation");
+                }
+            }
+
+            // Returns the string list values
+            return values;
+        }
+
+        // A function that calculates the answer and returns it
+        public static string RPN_Calc(string equation, List<string> values)
+        {
+            // Equations will be formatted in RPN like this: "{0} {1} - {2} +"
+
+            // Replaces the parameters in the equation with values
+            equation = string.Format(equation, values.Cast<object>().ToArray());
+
+            // Splits the string, equation into a string array that is declared as equationArray
+            string[] equationArray = equation.Split(' ');
+
+            // Declares and instantiates a new string stack called calc
+            Stack<float> calc = new Stack<float>();
+
+            foreach (string item in equationArray)
+            {
+                // Declares a float variable called floatItem and initialises it as 0.
+                float floatItem = 0;
+
+                // Pushes the item into the stack if it is a number or operates on existing items in the stack
+                if (float.TryParse(item, out floatItem))
+                {
+                    // Pushes the item into the stack
+                    calc.Push(floatItem);
+                }
+                else
+                {
+                    // Checks whether there is currently at least one value in the stack
+                    if (calc.Count() >= 1)
+                    {
+                        // Declares a new boolean variable called operated and initialises it as false
+                        bool operated = false;
+
+                        // Checks whether there are currently at least two values in the stack and whether the operation has already been carried out
+                        if (calc.Count() >= 2)
+                        {
+                            // Pops the top two items from the stack and stores the values in two float variables called x and y
+                            float y = calc.Pop();
+                            float x = calc.Pop();
+
+                            // Operates on the two values on x and y depending on the operator and then pushes the value back onto the stack
+                            switch (item)
+                            {
+                                case "+":
+                                    calc.Push(x + y);
+                                    operated = true;
+                                    break;
+                                case "-":
+                                    calc.Push(x - y);
+                                    operated = true;
+                                    break;
+                                case "*":
+                                    calc.Push(x * y);
+                                    operated = true;
+                                    break;
+                                case "/":
+                                    calc.Push(x / y);
+                                    operated = true;
+                                    break;
+                                case "^":
+                                    calc.Push((float)Math.Pow(x, y));
+                                    operated = true;
+                                    break;
+                                case "%":
+                                    calc.Push(x % y);
+                                    operated = true;
+                                    break;
+                                case "LOG":
+                                    calc.Push((float)Math.Log(x, y));
+                                    operated = true;
+                                    break;
+                                default:
+                                    calc.Push(x);
+                                    calc.Push(y);
+                                    break;
+                            }
+                        }
+
+                        // Checks whether an operation has already been carried out
+                        if (!operated)
+                        {
+                            // Pops the top item from the stack and stores the value in a float variable called z
+                            float z = calc.Pop();
+
+                            // Operates on the value on z depending on the operator and then pushes the value back onto the stack
+                            switch (item)
+                            {
+                                // I have also had to convert from radians to degrees as the Math function returns values in radians
+                                case "SIN":
+                                    calc.Push((float)Math.Sin(z * 2 * Math.PI / 360));
+                                    break;
+                                case "COS":
+                                    calc.Push((float)Math.Cos(z * 2 * Math.PI / 360));
+                                    break;
+                                case "TAN":
+                                    calc.Push((float)Math.Tan(z * 2 * Math.PI / 360));
+                                    break;
+                                case "ARCSIN":
+                                    calc.Push((float)(Math.Asin(z) * 360 / (2 * Math.PI)));
+                                    break;
+                                case "ARCCOS":
+                                    calc.Push((float)(Math.Acos(z) * 360 / (2 * Math.PI)));
+                                    break;
+                                case "ARCTAN":
+                                    calc.Push((float)(Math.Atan(z) * 360 / (2 * Math.PI)));
+                                    break;
+                                default:
+                                    calc.Push(z);
+                                    MessageBox.Show("ERROR as an invalid operator has been used");
+                                    break;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        MessageBox.Show("ERROR as there are not enough items in the stack or an invalid operator has been used");
+                    }
+                }
+            }
+
+            // Returns the answer
+            if (calc.Count() == 1)
+            {
+                // Returns the calculated answer to 3 significant figures (G3 is 3 s.f. in general format, e.g. "6.63E-34")
+                return calc.Pop().ToString("G3");
+            }
+            else
+            {
+                MessageBox.Show("ERROR with finding answer in stack");
+                return null;
+            }
         }
     }
 
@@ -922,44 +1050,8 @@ AND    U.userID       = @userID;
                     }
                 }
 
-                // Ranges will be formatted like this: "10:20;60:70;35:45"
-
-                // Stores the ranges obtained from the SELECT statement in a new string array called rangesArray
-                string[] rangesArray = ranges.Split(';');
-
-                // Splits the ranges up into bounds for each range
-                foreach (string item in rangesArray)
-                {
-                    // Splits the ranges up into bounds
-                    string[] bounds = item.Split(':');
-
-                    // Checks whether there are two bounds stored in the array, i.e. the lower and upper bound
-                    if (bounds.Length == 2)
-                    {
-                        // Declares and initialises the upper and lower bounds to 0
-                        float lBound = 0;
-                        float uBound = 0;
-
-                        // Tries to parse the bounds from string to float and otherwise returns an error
-                        if (float.TryParse(bounds[0], out lBound) && float.TryParse(bounds[1], out uBound))
-                        {
-                            // Generates a random value between the lower and upper bound to the number of decimal places stated and stores it in the string list values
-                            values.Add((
-                                (float)rnd.Next(
-                                (Int32)(lBound * Math.Pow(10, dp)),
-                                (Int32)(uBound * Math.Pow(10, dp) + 1))
-                                * Math.Pow(10, -dp)).ToString());
-                        }
-                        else
-                        {
-                            MessageBox.Show("ERROR with parsing bounds");
-                        }
-                    }
-                    else
-                    {
-                        MessageBox.Show("ERROR with bounds notation");
-                    }
-                }
+                // Calls the function getValues() to generate values and stores them in the string list values
+                values.AddRange(MathQMethods.getValues(this.rnd, ranges, dp));
 
                 // Declares an integer variable called numOfParam and initialises it to 0
                 int numOfParam = 0;
@@ -981,7 +1073,7 @@ AND    U.userID       = @userID;
                     this.question = string.Format(this.question, values.Cast<object>().ToArray());
 
                     // Calculates and stores the answer
-                    this.answer = RPN_Calc(equation, values);
+                    this.answer = MathQMethods.RPN_Calc(equation, values);
                 }
                 else
                 {
@@ -990,142 +1082,61 @@ AND    U.userID       = @userID;
             }
         }
 
-        // A function that calculates the answer and returns it
-        private string RPN_Calc(string equation, List<string> values)
+        /*
+        // A function that generates a list of values and returns it
+        private List<string> getValues(string ranges, int dp)
         {
-            // Equations will be formatted in RPN like this: "{0} {1} - {2} +"
+            // Instantiates a new string list called values
+            List<string> values = new List<string>();
 
-            // Replaces the parameters in the equation with values
-            equation = string.Format(equation, values.Cast<object>().ToArray());
+            // Ranges will be formatted like this: "10:20;60:70;35:45"
 
-            // Splits the string, equation into a string array that is declared as equationArray
-            string[] equationArray = equation.Split(' ');
+            // Stores the ranges obtained from the SELECT statement in a new string array called rangesArray
+            string[] rangesArray = ranges.Split(';');
 
-            // Declares and instantiates a new string stack called calc
-            Stack<float> calc = new Stack<float>();
-
-            foreach (string item in equationArray)
+            // Splits the ranges up into bounds for each range
+            foreach (string item in rangesArray)
             {
-                // Declares a float variable called floatItem and initialises it as 0.
-                float floatItem = 0;
+                // Splits the ranges up into bounds
+                string[] bounds = item.Split(':');
 
-                // Pushes the item into the stack if it is a number or operates on existing items in the stack
-                if (float.TryParse(item, out floatItem))
+                // Checks whether there are two bounds stored in the array, i.e. the lower and upper bound
+                if (bounds.Length == 2)
                 {
-                    // Pushes the item into the stack
-                    calc.Push(floatItem);
-                }
-                else
-                {
-                    // Checks whether there is currently at least one value in the stack
-                    if (calc.Count() >= 1)
+                    // Declares and initialises the upper and lower bounds to 0
+                    float lBound = 0;
+                    float uBound = 0;
+
+                    // Tries to parse the bounds from string to float and otherwise returns an error
+                    if (float.TryParse(bounds[0], out lBound) && float.TryParse(bounds[1], out uBound))
                     {
-                        // Declares a new boolean variable called operated and initialises it as false
-                        bool operated = false;
-
-                        // Checks whether there are currently at least two values in the stack and whether the operation has already been carried out
-                        if (calc.Count() >= 2)
-                        {
-                            // Pops the top two items from the stack and stores the values in two float variables called x and y
-                            float y = calc.Pop();
-                            float x = calc.Pop();
-
-                            // Operates on the two values on x and y depending on the operator and then pushes the value back onto the stack
-                            switch (item)
-                            {
-                                case "+":
-                                    calc.Push(x + y);
-                                    operated = true;
-                                    break;
-                                case "-":
-                                    calc.Push(x - y);
-                                    operated = true;
-                                    break;
-                                case "*":
-                                    calc.Push(x * y);
-                                    operated = true;
-                                    break;
-                                case "/":
-                                    calc.Push(x / y);
-                                    operated = true;
-                                    break;
-                                case "^":
-                                    calc.Push((float) Math.Pow(x, y));
-                                    operated = true;
-                                    break;
-                                case "%":
-                                    calc.Push(x % y);
-                                    operated = true;
-                                    break;
-                                case "LOG":
-                                    calc.Push((float) Math.Log(x, y));
-                                    operated = true;
-                                    break;
-                                default:
-                                    calc.Push(x);
-                                    calc.Push(y);
-                                    break;
-                            }
-                        }
-
-                        // Checks whether an operation has already been carried out
-                        if (!operated)
-                        {
-                            // Pops the top item from the stack and stores the value in a float variable called z
-                            float z = calc.Pop();
-
-                            // Operates on the value on z depending on the operator and then pushes the value back onto the stack
-                            switch (item)
-                            {
-                                // I have also had to convert from radians to degrees as the Math function returns values in radians
-                                case "SIN":
-                                    calc.Push((float)Math.Sin(z * 2 * Math.PI / 360));
-                                    break;
-                                case "COS":
-                                    calc.Push((float)Math.Cos(z * 2 * Math.PI / 360));
-                                    break;
-                                case "TAN":
-                                    calc.Push((float)Math.Tan(z * 2 * Math.PI / 360));
-                                    break;
-                                case "ARCSIN":
-                                    calc.Push((float)(Math.Asin(z) * 360 / (2 * Math.PI)));
-                                    break;
-                                case "ARCCOS":
-                                    calc.Push((float)(Math.Acos(z) * 360 / (2 * Math.PI)));
-                                    break;
-                                case "ARCTAN":
-                                    calc.Push((float)(Math.Atan(z) * 360 / (2 * Math.PI)));
-                                    break;
-                                default:
-                                    calc.Push(z);
-                                    MessageBox.Show("ERROR as an invalid operator has been used");
-                                    break;
-                            }
-                        }
+                        // Generates a random value between the lower and upper bound to the number of decimal places stated and stores it in the string list values
+                        values.Add((
+                            (float)this.rnd.Next(
+                            (Int32)(lBound * Math.Pow(10, dp)),
+                            (Int32)(uBound * Math.Pow(10, dp) + 1))
+                            * Math.Pow(10, -dp)).ToString());
                     }
                     else
                     {
-                        MessageBox.Show("ERROR as there are not enough items in the stack or an invalid operator has been used");
+                        MessageBox.Show("ERROR with parsing bounds");
                     }
+                }
+                else
+                {
+                    MessageBox.Show("ERROR with bounds notation");
                 }
             }
 
-            // Returns the answer
-            if (calc.Count() == 1)
-            {
-                // Returns the calculated answer to 3 significant figures (G3 is 3 s.f. in general format, e.g. "6.63E-34")
-                return calc.Pop().ToString("G3");
-            }
-            else
-            {
-                MessageBox.Show("ERROR with finding answer in stack");
-                return null;
-            }
+            // Returns the string list values
+            return values;
         }
+        */
     }
 
     public class CreateActivity
     {
+        // Declares an integer variable that stores the questionID
         private int questionID;
 
         // Constructor
@@ -1299,25 +1310,43 @@ VALUES(@answerCount, @answer, @answerType, @questionCount);
             }
         }
 
-        // A procedure that adds a new question and answer to the database
-        public void createQna(SqlConnection connection, string question, string answer)
+        // A function that adds a new question and answer to the database
+        public bool createQna(SqlConnection connection, string question, string answer)
         {
-            createQ(connection, question, "QNA");
-            createA(connection, answer.ToUpper(), "QNA");
+            // Calls a function to validate the question
+            if (this.getIsQ(question))
+            {
+                createQ(connection, question, "QNA");
+                createA(connection, answer.ToUpper(), "QNA");
+
+                return true;
+            }
+            else MessageBox.Show("Please ensure your question ends with a question mark");
+
+            return false;
         }
 
-        // A procedure that adds a new question and four new answers to the database
-        public void createTimedMC(SqlConnection connection, string question, string answerT, string answerF1, string answerF2, string answerF3)
+        // A function that adds a new question and four new answers to the database
+        public bool createTimedMC(SqlConnection connection, string question, string answerT, string answerF1, string answerF2, string answerF3)
         {
-            createQ(connection, question, "MULT");
-            createA(connection, answerT, "MULTT");
-            createA(connection, answerF1, "MULTF");
-            createA(connection, answerF2, "MULTF");
-            createA(connection, answerF3, "MULTF");
+            // Calls a function to validate the question
+            if (this.getIsQ(question))
+            {
+                createQ(connection, question, "MULT");
+                createA(connection, answerT, "MULTT");
+                createA(connection, answerF1, "MULTF");
+                createA(connection, answerF2, "MULTF");
+                createA(connection, answerF3, "MULTF");
+
+                return true;
+            }
+            else MessageBox.Show("Please ensure your question ends with a question mark");
+
+            return false;
         }
 
-        // A procedure that adds a new question, keywords and a model answer to the database
-        public void createWordedQ(SqlConnection connection, string question, string mAnswer, List<string> keyWords)
+        // A function that adds a new question, keywords and a model answer to the database
+        public bool createWordedQ(SqlConnection connection, string question, string mAnswer, List<string> keyWords)
         {
             createQ(connection, question, "WQ");
             createA(connection, mAnswer, "WQA");
@@ -1326,18 +1355,59 @@ VALUES(@answerCount, @answer, @answerType, @questionCount);
             {
                 createA(connection, item.ToUpper(), "WQK");
             }
+
+            return true;
         }
 
-        // A procedure that adds a new question, the equation, the ranges and the decimal places of the ranges
-        public void createMathQ(SqlConnection connection, string question, string equation, string ranges, string dp)
+        // A function that adds a new question, the equation, the ranges and the decimal places of the ranges
+        public bool createMathQ(SqlConnection connection, string question, string equation, string ranges, string dp)
         {
             // Equations will be formatted in RPN like this: "{0} {1} - {2} +"
             // Ranges will be formatted like this: "10:20;60:70;35:45"
 
-            createQ(connection, question, "MQ");
-            createA(connection, equation.ToUpper(), "MQE");
-            createA(connection, ranges, "MQR");
-            createA(connection, dp, "MQDP");
+            // Calls a function to validate the string variables question, ranges and dp
+            if (this.getAreEqRaDp(equation, ranges, dp))
+            {
+                createQ(connection, question, "MQ");
+                createA(connection, equation.ToUpper(), "MQE");
+                createA(connection, ranges, "MQR");
+                createA(connection, dp, "MQDP");
+
+                return true;
+            }
+            else MessageBox.Show("Either the equation, ranges or dp are incorrect");
+
+            return false;
+        }
+
+        // A function that validates the question to see if it is actually a valid question
+        private bool getIsQ(string question)
+        {
+            return (question.EndsWith("?")) ? true : false;
+        }
+
+        // This function validates equation, values and dp and returns true when all three are valid inputs
+        private bool getAreEqRaDp(string equation, string ranges, string dp)
+        {
+            // Instantiates a new object that generates pseudorandom integers using the system clock
+            Random rnd = new Random();
+
+            // Declares a new integer variable called intDp and initialises it to 0
+            int intDp = 0;
+
+            // Tries to parse the string variable dp into an integer variable and stores the values in the integer variable intDp
+            if (Int32.TryParse(dp, out intDp))
+            {
+                // Instantiates a new string list called values
+                List<string> values = new List<string>();
+
+                // Calls the function getValues() to generate values and stores them in the string list values
+                values.AddRange(MathQMethods.getValues(rnd, ranges, intDp));
+
+                // Tries to calculate a value using the function RPN_Calc() and parsing in the parameters equation and values
+                if (MathQMethods.RPN_Calc(equation, values) != null) return true;
+            }
+            return false;
         }
     }
 }

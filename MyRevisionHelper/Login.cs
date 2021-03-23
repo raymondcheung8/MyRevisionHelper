@@ -103,10 +103,11 @@ userAdmin       BIT             NOT NULL
 
                             // Generates a random salt
                             byte[] salt = new byte[UserLogin.saltLength];
-                            salt = getSalt();
+                            getSalt().CopyTo(salt, 0);
 
                             // Generates a salted hash of the password
-                            byte[] hPassword = getSaltedHash("abcde", salt);
+                            byte[] hPassword = new byte[UserLogin.hPasswordLength];
+                            getSaltedHash("abcde", salt).CopyTo(hPassword, 0);
 
                             // TEST FOR AN OLD VERSION OF THE CODE THAT DIDN'T WORK
                             // MessageBox.Show(Encoding.UTF8.GetString(salt));
@@ -128,23 +129,40 @@ VALUES (@userID, 'admin', @hPassword, @salt, 1);
                             command.Parameters.Clear();
                         }
 
+                        // Calls upon the getTableExists() function and will create a new table called tblNotes if there isn't already an existing one
+                        if (!getTableExists(connection, "tblNotes"))
+                        {
+                            // A SQL query that creates a new table called "tblNotes" where "noteID" is the primary key
+                            command.CommandText = @"
+CREATE TABLE tblNotes
+(
+noteID          CHAR(36)    NOT NULL    PRIMARY KEY,
+insertDate      DATETIME    NOT NULL,
+noteDescr       TEXT        NOT NULL,
+userID          CHAR(36)    NOT NULL    REFERENCES  tblUsers (userID)
+);
+";
+                            // Runs the SQL code
+                            command.ExecuteNonQuery();
+                        }
+
                         /*
                         // Message boxes that test whether the function getTableExists() works
-                        MessageBox.Show(Program.getTableExists(connection, "tblCounters").ToString());
-                        MessageBox.Show(Program.getTableExists(connection, "tblQuestions").ToString());
-                        MessageBox.Show(Program.getTableExists(connection, "tblAnswers").ToString());
-                        MessageBox.Show(Program.getTableExists(connection, "tblUserAnswers").ToString());
+                        MessageBox.Show(getTableExists(connection, "tblCounters").ToString());
+                        MessageBox.Show(getTableExists(connection, "tblQuestions").ToString());
+                        MessageBox.Show(getTableExists(connection, "tblAnswers").ToString());
+                        MessageBox.Show(getTableExists(connection, "tblUserAnswers").ToString());
                         */
 
                         // Creates a new counter table if it doesn't already exist
-                        if (!Program.getTableExists(connection, "tblCounters"))
+                        if (!getTableExists(connection, "tblCounters"))
                         {
                             // A SQL query that creates a counter table
                             command.CommandText = @"
 -- Creates a counter table
 CREATE TABLE tblCounters
 (
-counterType		VARCHAR(8)		NOT NULL,
+counterType		VARCHAR(8)		NOT NULL    PRIMARY KEY,
 counterID		INT				NOT NULL
 );
 
@@ -159,7 +177,7 @@ INSERT INTO tblCounters VALUES ('AID', 1);
 
 
                         // Creates a new question table if it doesn't already exist
-                        if (!Program.getTableExists(connection, "tblQuestions"))
+                        if (!getTableExists(connection, "tblQuestions"))
                         {
                             // A SQL query that creates a question table
                             command.CommandText = @"
@@ -178,7 +196,7 @@ questionType    VARCHAR(8)  NOT NULL
 
 
                         // Creates a new answer table if it doesn't already exist
-                        if (!Program.getTableExists(connection, "tblAnswers"))
+                        if (!getTableExists(connection, "tblAnswers"))
                         {
                             // A SQL query that creates an answer table
                             command.CommandText = @"
@@ -198,7 +216,7 @@ questionID      INT         NOT NULL REFERENCES tblQuestions (questionID),
 
 
                         // Creates a new userAnswers table if it doesn't already exist
-                        if (!Program.getTableExists(connection, "tblUserAnswers"))
+                        if (!getTableExists(connection, "tblUserAnswers"))
                         {
                             // A SQL query that creates an answer table
                             command.CommandText = @"
@@ -322,7 +340,10 @@ salt    LONGBINARY  NOT NULL
 INSERT INTO tblTest
 VALUES (@salt)
 ";
-                    byte[] salt = getSalt();
+                    // Generates a random salt
+                    byte[] salt = new byte[32];
+                    getSalt().CopyTo(salt, 0);
+
                     command.Parameters.AddWithValue("@salt", salt);
                     command.ExecuteNonQuery();
                     
@@ -388,7 +409,58 @@ FROM tblTest;
         // Function that returns whether a certain table exists
         private bool getTableExists(SqlConnection connection, string tableName)
         {
-            return Program.getTableExists(connection, tableName);
+            // Declares a new datatable that will contain all of the tables
+            DataTable tableSchema;
+
+            // Declares a new datatable that will contain the table that is being searched for
+            DataRow[] myTable;
+
+            // Opens a new connection if there isn't already a connection open (this just makes sure an error relating to no connection being open won't occur)
+            if (connection.State != ConnectionState.Open) connection.Open();
+
+            // Copies all the tables on the database to a local datatable
+            tableSchema = connection.GetSchema("TABLES");
+
+            // Copies all the tables that have the same name as the table we are searching for to a datarow array
+            myTable = tableSchema.Select(string.Format("TABLE_NAME='{0}'", tableName));
+
+            // Returns false if the datarow is empty and otherwise returns true
+            if (myTable.Length == 0)
+            {
+                // Test to see if it will show the correct message when table doesn't exist
+                //MessageBox.Show("TABLE DOESN'T EXIST");
+
+                return false;
+            }
+            else
+            {
+                // Test to see if it will show the correct message when table doesn't exist
+                //MessageBox.Show("TABLE EXISTS");
+
+                return true;
+            }
+
+            // THE BELOW CODE DOESN'T WORK AS IT THROWS A PERMISSION ERROR FOR THE TABLE 'MSysObjects'
+            /*
+            // A SQL query that finds if a certain table already exists
+            // Type 1, Type 4, Type 6 in MSysObjects are the user created tables
+            // type 1 = Table - Local Access Tables
+            // type 4 = Table - Linked ODBC Tables
+            // type 6 = Table - Linked Access Tables
+            command.CommandText = string.Format(@"
+SELECT MSysObjects.Name
+FROM MSysObjects
+WHERE
+MSysObjects.type In (1,4,6)
+AND MSysObjects.Name = '{0}'
+", tableName);
+
+            // Runs the SQL code and stores the result in reader
+            SqlDataReader reader = command.ExecuteReader();
+
+            // Returns the boolean value of whether or not reader has rows
+            return reader.HasRows;
+             */
         }
 
         // Method that opens a new form that allows the user to create a new account
@@ -595,7 +667,7 @@ WHERE username = @username;
             createActivity.createTimedMC(connection, "An atom of Nitrogen (nucleon number = 16, proton number = 7) gains 3 electrons.\n\nWhat is the specific charge of the ion?",
                 "−1.80 × 10^7 Ckg^–1",
                 "1.80 × 10^7 Ckg^–1", "4.19 × 10^7 Ckg^–1", "-4.19 × 10^7 Ckg^–1");
-            createActivity.createTimedMC(connection, "Electrons moving in a beam have the same de Broglie wavelength as protons in a separate beam moving at a speed of 2.8 × 104 ms^–1.\n\nWhat is the speed of the electrons?",
+            createActivity.createTimedMC(connection, "Electrons moving in a beam have the same de Broglie wavelength as protons in a separate beam moving at a speed of 2.8 × 10^4 ms^–1.\n\nWhat is the speed of the electrons?",
                 "5.1 × 10^7 ms^−1",
                 "1.5 × 10^1 ms^−1", "2.8 × 10^4 ms^−1", "1.2 × 10^6 ms^−1");
             createActivity.createTimedMC(connection, "Which statement is not correct for ultrasound and X-rays?",
@@ -657,7 +729,7 @@ WHERE username = @username;
                 "0:90;1.5:1.6",
                 "2");
             createActivity.createMathQ(connection, "Solar cells convert solar energy to useful electrical energy in the road sign with an efficiency of {0}%. The solar-cell supply used by the engineer has a total surface area of {1} cm^2.\n\nCalculate the minimum intensity, in Wm^–2, of the sunlight needed to provide the minimum current of {2} mA to the road sign when it has a resistance of {3} Ω.",
-                "{2} 10 -3 ^ * 2 ^ {3} * {0} / {1} 10 -4 ^ * /",
+                "{2} 10 -3 ^ * 2 ^ {3} * {0} 10 -2 ^ * / {1} 10 -4 ^ * /",
                 "1:100;10:50;50:100;1:10",
                 "1");
 

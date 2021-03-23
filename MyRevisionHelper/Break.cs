@@ -76,10 +76,22 @@ namespace MyRevisionHelper
         // Method that starts the timer unless the timer hasn't been set
         private void start_btn_Click(object sender, EventArgs e)
         {
+            // This is a presence check to see whether the user has entered a time into the timer
             if (secs.Value == 0 && mins.Value == 0 && hrs.Value == 0)
+            {
                 MessageBox.Show("Please set the timer first!");
+            }
+            else
+            {
+                // This displays a message to the user recommending them to shorten their break if it is beyond 1 hour
+                if ((hrs.Value == 1 && (mins.Value != 0 || secs.Value != 0)) || hrs.Value > 1)
+                {
+                    MessageBox.Show("Please consider making your break shorter, it is recommended that short breaks of 5 to 15 mins are taken every hour and long breaks of 30 mins to 1 hour are taken every 2 to 4 hours");
+                }
 
-            else breakTimer.Start();
+                // Starts the timer
+                breakTimer.Start();
+            }
         }
 
         // Method that pauses the timer

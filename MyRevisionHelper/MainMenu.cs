@@ -12,7 +12,18 @@ using System.Data.SqlClient;
 namespace MyRevisionHelper
 {
     public partial class MainMenu : Form
-    {        
+    {
+        // A new timer that runs in the background is created
+        private Timer timer = new Timer();
+
+        // Declares the integer variables hrs, mins and secs and initialises them as 0
+        private int hrs = 0;
+        private int mins = 0;
+        private int secs = 0;
+
+        // Declares a boolean variable isBreakMsgDisp that tells the software whether or not the message box recommending the user to take a break should be shown and initialises the variable to false
+        private bool isBreakMsgDisp = false;
+
         public MainMenu()
         {
             InitializeComponent();
@@ -97,6 +108,51 @@ namespace MyRevisionHelper
             create_btn.Hide();
             notes_btn.Hide();
             break_btn.Hide();
+
+            // This allows the timer to tick
+            timer.Tick += new EventHandler(timer_Tick);
+
+            // This sets the interval of the timer to 1s
+            timer.Interval = 1000;
+
+            // Starts the timer
+            timer.Start();
+
+            // This displays the time spent on this program ({0:00} ensures the single digit numbers are displayed as two digits)
+            timer_lbl.Text = string.Format("Time spent on this program --- {0:00}:{1:00}:{2:00}", hrs, mins, secs);
+        }
+
+        // Method that codes for the increment of the values of seconds, minutes and hours
+        private void timer_Tick(object sender, EventArgs e)
+        {
+            // Codes for the increment of the integer variables secs, mins and hrs
+            if (secs < 59)
+            {
+                secs++;
+            }
+            else
+            {
+                secs = 0;
+                if (mins < 59)
+                {
+                    mins++;
+                }
+                else
+                {
+                    mins = 0;
+                    hrs++;
+                    isBreakMsgDisp = true;
+                }
+            }
+
+            // This displays the time spent on this program ({0:00} ensures the single digit numbers are displayed as two digits)
+            timer_lbl.Text = string.Format("Time spent on this program --- {0:00}:{1:00}:{2:00}", hrs, mins, secs);
+        }
+
+        // Method that codes for the display of the message box recommending the user to take a break when it has been more than 1 hour since the last time they have taken a break
+        private void dispBreakMsg()
+        {
+            MessageBox.Show("More than an hour has surpassed since your last break, I recommend a break is taken before your next activity");
         }
 
         // Method for what happens when login_btn is clicked
@@ -296,6 +352,9 @@ WHERE  NOT EXISTS (SELECT 1
             {
                 openNewForm(newForm);
             }
+
+            // Displays a message box recommending the user to take a break if it has been more than 1 hour since the last time they have taken a break
+            if (isBreakMsgDisp) dispBreakMsg();
         }
 
         // Method for what happens when wordedQ_btn is clicked
@@ -306,6 +365,9 @@ WHERE  NOT EXISTS (SELECT 1
             {
                 openNewForm(newForm);
             }
+
+            // Displays a message box recommending the user to take a break if it has been more than 1 hour since the last time they have taken a break
+            if (isBreakMsgDisp) dispBreakMsg();
         }
 
         // Method for what happens when mathQ_btn is clicked
@@ -316,6 +378,9 @@ WHERE  NOT EXISTS (SELECT 1
             {
                 openNewForm(newForm);
             }
+
+            // Displays a message box recommending the user to take a break if it has been more than 1 hour since the last time they have taken a break
+            if (isBreakMsgDisp) dispBreakMsg();
         }
 
         // Method for what happens when timedMC_btn is clicked
@@ -326,6 +391,9 @@ WHERE  NOT EXISTS (SELECT 1
             {
                 openNewForm(newForm);
             }
+
+            // Displays a message box recommending the user to take a break if it has been more than 1 hour since the last time they have taken a break
+            if (isBreakMsgDisp) dispBreakMsg();
         }
 
         // Method for what happens when create_btn is clicked
@@ -356,6 +424,9 @@ WHERE  NOT EXISTS (SELECT 1
             {
                 openNewForm(newForm);
             }
+
+            // Resets the boolean variable isBreakMsgDisp to false if it was previously true
+            if (isBreakMsgDisp) isBreakMsgDisp = false;
         }
 
         // Method for what happens when exit_btn is clicked

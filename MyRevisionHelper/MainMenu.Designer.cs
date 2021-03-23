@@ -37,11 +37,12 @@
             this.exit_btn = new System.Windows.Forms.Button();
             this.create_btn = new System.Windows.Forms.Button();
             this.login_btn = new System.Windows.Forms.Button();
+            this.timer_lbl = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // qna_btn
             // 
-            this.qna_btn.Location = new System.Drawing.Point(12, 12);
+            this.qna_btn.Location = new System.Drawing.Point(12, 25);
             this.qna_btn.Name = "qna_btn";
             this.qna_btn.Size = new System.Drawing.Size(100, 100);
             this.qna_btn.TabIndex = 0;
@@ -51,7 +52,7 @@
             // 
             // wordedQ_btn
             // 
-            this.wordedQ_btn.Location = new System.Drawing.Point(118, 12);
+            this.wordedQ_btn.Location = new System.Drawing.Point(118, 25);
             this.wordedQ_btn.Name = "wordedQ_btn";
             this.wordedQ_btn.Size = new System.Drawing.Size(100, 100);
             this.wordedQ_btn.TabIndex = 1;
@@ -61,7 +62,7 @@
             // 
             // mathQ_btn
             // 
-            this.mathQ_btn.Location = new System.Drawing.Point(224, 12);
+            this.mathQ_btn.Location = new System.Drawing.Point(224, 25);
             this.mathQ_btn.Name = "mathQ_btn";
             this.mathQ_btn.Size = new System.Drawing.Size(100, 100);
             this.mathQ_btn.TabIndex = 2;
@@ -71,7 +72,7 @@
             // 
             // timedMC_btn
             // 
-            this.timedMC_btn.Location = new System.Drawing.Point(330, 12);
+            this.timedMC_btn.Location = new System.Drawing.Point(330, 25);
             this.timedMC_btn.Name = "timedMC_btn";
             this.timedMC_btn.Size = new System.Drawing.Size(100, 100);
             this.timedMC_btn.TabIndex = 3;
@@ -81,7 +82,7 @@
             // 
             // notes_btn
             // 
-            this.notes_btn.Location = new System.Drawing.Point(12, 147);
+            this.notes_btn.Location = new System.Drawing.Point(12, 160);
             this.notes_btn.Name = "notes_btn";
             this.notes_btn.Size = new System.Drawing.Size(75, 23);
             this.notes_btn.TabIndex = 4;
@@ -91,7 +92,7 @@
             // 
             // break_btn
             // 
-            this.break_btn.Location = new System.Drawing.Point(93, 147);
+            this.break_btn.Location = new System.Drawing.Point(93, 160);
             this.break_btn.Name = "break_btn";
             this.break_btn.Size = new System.Drawing.Size(256, 23);
             this.break_btn.TabIndex = 5;
@@ -101,7 +102,7 @@
             // 
             // exit_btn
             // 
-            this.exit_btn.Location = new System.Drawing.Point(355, 147);
+            this.exit_btn.Location = new System.Drawing.Point(355, 160);
             this.exit_btn.Name = "exit_btn";
             this.exit_btn.Size = new System.Drawing.Size(75, 23);
             this.exit_btn.TabIndex = 6;
@@ -111,7 +112,7 @@
             // 
             // create_btn
             // 
-            this.create_btn.Location = new System.Drawing.Point(12, 118);
+            this.create_btn.Location = new System.Drawing.Point(12, 131);
             this.create_btn.Name = "create_btn";
             this.create_btn.Size = new System.Drawing.Size(418, 23);
             this.create_btn.TabIndex = 7;
@@ -121,7 +122,7 @@
             // 
             // login_btn
             // 
-            this.login_btn.Location = new System.Drawing.Point(12, 12);
+            this.login_btn.Location = new System.Drawing.Point(12, 25);
             this.login_btn.Name = "login_btn";
             this.login_btn.Size = new System.Drawing.Size(418, 129);
             this.login_btn.TabIndex = 8;
@@ -129,11 +130,21 @@
             this.login_btn.UseVisualStyleBackColor = true;
             this.login_btn.Click += new System.EventHandler(this.login_btn_Click);
             // 
+            // timer_lbl
+            // 
+            this.timer_lbl.AutoSize = true;
+            this.timer_lbl.Location = new System.Drawing.Point(12, 9);
+            this.timer_lbl.Name = "timer_lbl";
+            this.timer_lbl.Size = new System.Drawing.Size(35, 13);
+            this.timer_lbl.TabIndex = 9;
+            this.timer_lbl.Text = "label1";
+            // 
             // MainMenu
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(444, 181);
+            this.ClientSize = new System.Drawing.Size(444, 196);
+            this.Controls.Add(this.timer_lbl);
             this.Controls.Add(this.create_btn);
             this.Controls.Add(this.exit_btn);
             this.Controls.Add(this.break_btn);
@@ -147,6 +158,7 @@
             this.Text = "Main Menu";
             this.Load += new System.EventHandler(this.MainMenu_Load);
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -161,6 +173,7 @@
         private System.Windows.Forms.Button exit_btn;
         private System.Windows.Forms.Button create_btn;
         private System.Windows.Forms.Button login_btn;
+        private System.Windows.Forms.Label timer_lbl;
     }
 }
 
